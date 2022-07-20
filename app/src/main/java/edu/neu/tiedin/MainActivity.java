@@ -1,18 +1,17 @@
 package edu.neu.tiedin;
 
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.StaticDataFetcher;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
+import com.apollographql.apollo3.ApolloClient;
+import com.apollographql.apollo3.cache.normalized.NormalizedCache;
+import com.apollographql.apollo3.cache.normalized.api.FieldPolicyCacheResolver;
+import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
+import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
 
-import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
+import edu.neu.tiedin.type.Point;
+import graphql.com.google.common.base.Optional;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +20,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ApolloClient.Builder builder = new ApolloClient.Builder()
+                .serverUrl("https://api.openbeta.io/");
+
+
+        // Optionally, set a normalized cache
+        NormalizedCache.configureApolloClientBuilder(
+                builder,
+                new MemoryCacheFactory(10 * 1024 * 1024, -1),
+                TypePolicyCacheKeyGenerator.INSTANCE,
+                FieldPolicyCacheResolver.INSTANCE,
+                false
+        );
+
+        ApolloClient client = builder.build();
+        client.query(new CragsNearQuery("Example", new Point(Optional.of(42.24738820721922), -71.32416137320287),0, 1600*50,true)).execute();
 
     }
 

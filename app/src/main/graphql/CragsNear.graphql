@@ -1,0 +1,11 @@
+query CragsNear($placeId: String, $lnglat: Point, $minDistance: Int, $maxDistance: Int, $includeCrags: Boolean) {
+    cragsNear(placeId: $placeId, lnglat: $lnglat, minDistance: $minDistance, maxDistance: $maxDistance, includeCrags: $includeCrags) {
+        placeId
+        count
+        crags {
+            id
+            uuid
+            areaName
+        }
+    }
+}
