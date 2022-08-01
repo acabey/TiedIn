@@ -1,5 +1,8 @@
 package edu.neu.tiedin;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -28,10 +31,21 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    public static final String SHARED_PREFS = "LOGIN_PREFS";
+    public static final String USER_KEY = "USER_SESSION_KEY";
+
+    SharedPreferences sharedpreferences;
+    String email, password;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Get login preferences (if they exist)
+        sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+
+        email = sharedpreferences.getString(USER_KEY, null);
 
         ApolloClient.Builder builder = new ApolloClient.Builder()
                 .serverUrl("https://api.openbeta.io/");
@@ -47,12 +61,6 @@ public class MainActivity extends AppCompatActivity {
         );
 
         ApolloClient client = builder.build();
-//        client.query(new CragsNearQuery(new Optional.Present<>("Example"),
-//                new Optional.Present<>(new Point(new Optional.Present<>(42.24738820721922), new Optional.Present<>(-71.32416137320287))),
-//                new Optional.Present<>(0),
-//                new Optional.Present<>(1600*50),
-//                new Optional.Present<>(true))).execute();
-
 
         ApolloCall<CragsNearQuery.Data> cragsNearBoston = client.query(new CragsNearQuery("Example",
                 new Point(new Optional.Present<>(42.24738820721922), new Optional.Present<>(-71.32416137320287)),
@@ -69,6 +77,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        forceLogin();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        forceLogin();
+    }
+
+    private void forceLogin() {
+        // If there is an existing session, transition to Main
+        if (email == null) {
+            Log.d(TAG, "forceLogin: email not found, forcing login screen");
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(i);
+        }
     }
 
 }
