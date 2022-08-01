@@ -1,0 +1,35 @@
+query ClimbByUUID($uuid: ID) {
+    climb(uuid: $uuid) {
+        id
+        uuid
+        name
+        fa
+        yds
+        type {
+            trad
+            sport
+            bouldering
+            alpine
+            mixed
+            aid
+            tr
+        }
+        safety
+        metadata {
+            lat
+            lng
+            left_right_index
+            leftRightIndex
+            mp_id
+            climb_id
+            climbId
+        }
+        content {
+            description
+            location
+            protection
+        }
+        pathTokens
+        ancestors
+    }
+}

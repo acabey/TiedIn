@@ -1,0 +1,64 @@
+query AreaByUUID($uuid: ID) {
+    area(uuid: $uuid) {
+        id
+        uuid
+        area_name
+        areaName
+        totalClimbs
+        ancestors
+        children {
+            id
+            uuid
+        }
+        metadata {
+            isDestination
+            leaf
+            lat
+            lng
+            bbox
+            left_right_index
+            leftRightIndex
+            mp_id
+            area_id
+            areaId
+        }
+        climbs {
+            id
+            uuid
+        }
+        content {
+            description
+        }
+        aggregate {
+            byDiscipline {
+                trad {
+                    total
+                }
+                sport {
+                    total
+                }
+                boulder {
+                    total
+                }
+                alpine {
+                    total
+                }
+                mixed {
+                    total
+                }
+                aid {
+                    total
+                }
+                tr {
+                    total
+                }
+            }
+            byGradeBand {
+                beginner
+                intermediate
+                advance
+                expert
+            }
+        }
+    }
+}

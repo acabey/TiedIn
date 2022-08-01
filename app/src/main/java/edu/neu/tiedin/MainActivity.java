@@ -70,12 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         Single<ApolloResponse<CragsNearQuery.Data>> queryResponse = Rx3Apollo.single(cragsNearBoston);
 
-        queryResponse.subscribe(new Consumer<ApolloResponse<CragsNearQuery.Data>>() {
-            @Override
-            public void accept(ApolloResponse<CragsNearQuery.Data> dataApolloResponse) throws Throwable {
-                Log.d(TAG, "accept: size " + dataApolloResponse.data.cragsNear.size());
-            }
-        });
+        queryResponse.subscribe(dataApolloResponse -> Log.d(TAG, "accept: size " + dataApolloResponse.data.cragsNear.size()));
 
     }
 
