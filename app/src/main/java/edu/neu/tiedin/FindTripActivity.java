@@ -6,13 +6,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.apollographql.apollo3.ApolloCall;
 import com.apollographql.apollo3.ApolloClient;
 import com.apollographql.apollo3.api.ApolloResponse;
-import com.apollographql.apollo3.api.ExecutionContext;
 import com.apollographql.apollo3.api.Optional;
 import com.apollographql.apollo3.cache.normalized.NormalizedCache;
 import com.apollographql.apollo3.cache.normalized.api.FieldPolicyCacheResolver;
@@ -22,12 +20,8 @@ import com.apollographql.apollo3.rx3.Rx3Apollo;
 
 import edu.neu.tiedin.type.Point;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.functions.Action;
-import io.reactivex.rxjava3.functions.Consumer;
-import kotlin.coroutines.Continuation;
-import kotlin.coroutines.CoroutineContext;
 
-public class MainActivity extends AppCompatActivity {
+public class FindTripActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
@@ -40,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_find_trip);
 
         // Get login preferences (if they exist)
         sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
@@ -90,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         // If there is an existing session, transition to Main
         if (email == null) {
             Log.d(TAG, "forceLogin: email not found, forcing login screen");
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            Intent i = new Intent(FindTripActivity.this, LoginActivity.class);
             startActivity(i);
         }
     }
