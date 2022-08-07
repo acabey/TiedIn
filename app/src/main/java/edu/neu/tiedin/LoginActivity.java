@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
                 editor.apply();
 
                 // Transition to the main activity
-                Intent i = new Intent(LoginActivity.this, FindTripActivity.class);
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(i);
                 finish();
             }
@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         // If there is an existing session, transition to Main
         if (email != null) {
             Log.d(TAG, "onStart: existing session found, transitioning to main");
-            Intent i = new Intent(LoginActivity.this, FindTripActivity.class);
+            Intent i = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(i);
             finish();
         }
