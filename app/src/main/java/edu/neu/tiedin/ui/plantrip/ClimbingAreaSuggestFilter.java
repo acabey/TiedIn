@@ -22,6 +22,7 @@ import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
 import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import edu.neu.tiedin.AreasByFilterQuery;
@@ -123,12 +124,17 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> im
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View listItem = convertView;
         if(listItem == null)
-            listItem = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1,parent,false);
+            listItem = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2,parent,false);
 
         AreasByFilterQuery.Area currentArea = areasList.get(position);
 
         TextView name = (TextView) listItem.findViewById(android.R.id.text1);
+        TextView subtext = (TextView) listItem.findViewById(android.R.id.text2);
         name.setText(currentArea.areaName);
+
+        DecimalFormat df = new DecimalFormat("###.#####");
+        subtext.setText(df.format(currentArea.metadata.lat)
+                + ", " + df.format(currentArea.metadata.lng));
 
         return listItem;
     }

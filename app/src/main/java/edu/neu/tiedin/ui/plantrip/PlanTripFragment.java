@@ -2,28 +2,24 @@ package edu.neu.tiedin.ui.plantrip;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
-import android.widget.MultiAutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipDrawable;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
+import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 
 public class PlanTripFragment extends Fragment {
@@ -68,21 +64,31 @@ public class PlanTripFragment extends Fragment {
             planTripViewModel.setPlanDate(date);
         });
 
-//        ArrayList<String> crags = new ArrayList<>(Arrays.asList("Rumney", "Gunks", "Echo"));
-//        ArrayAdapter<String> testAdapter = new ArrayAdapter<>
-//                (getActivity(), android.R.layout.select_dialog_item, crags);
-
+        // Autocomplete Climbing Area search
         ClimbingAreaSuggestFilter areaSuggestFilter = new ClimbingAreaSuggestFilter(getActivity(), android.R.layout.simple_dropdown_item_1line);
         binding.editTextPlanArea.setAdapter(areaSuggestFilter);
-        binding.editTextPlanArea.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                String selected = (String) parent.getItemAtPosition(position);
-//                int pos = Arrays.asList().indexOf(selected);
-//                Log.d(TAG, "onItemClick: " + selected);
+
+        // Clicking an area from the autocomplete adds to the list of areas
+        binding.editTextPlanArea.setOnItemClickListener((parent, view, position, id) -> {
+            AreasByFilterQuery.Area selected = (AreasByFilterQuery.Area) parent.getItemAtPosition(position);
+            if (selected != null) {
+                // Add data to ViewModel
+                planTripViewModel.addPlannedArea(selected);
+
+                // Add chip to UI
+                Chip areaChip = new Chip(getContext(), null, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
+                ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(getContext(), null, 0, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
+                areaChip.setChipDrawable(chipDrawable);
+                areaChip.setText(selected.areaName);
+                areaChip.setOnCloseIconClickListener(v -> {
+                    planTripViewModel.removePlannedArea(selected);
+                    binding.chipGroupPlanAreas.removeView(areaChip);
+                });
+                binding.chipGroupPlanAreas.addView(areaChip);
+
+                Log.d(TAG, "onItemClick: " + selected.areaName);
             }
         });
-
 
         return root;
     }

@@ -102,6 +102,13 @@
                         android:minHeight="48dp" />
                 </LinearLayout>
 
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupPlanAreas"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="8dp"
+                    android:layout_weight="80"/>
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
