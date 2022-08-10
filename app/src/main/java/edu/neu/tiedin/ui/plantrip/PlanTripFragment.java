@@ -2,7 +2,6 @@ package edu.neu.tiedin.ui.plantrip;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +17,13 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.neu.tiedin.AreasByFilterQuery;
+import edu.neu.tiedin.R;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
+import edu.neu.tiedin.types.ClimbingStyle;
 
 public class PlanTripFragment extends Fragment {
 
@@ -88,6 +91,20 @@ public class PlanTripFragment extends Fragment {
 
                 Log.d(TAG, "onItemClick: " + selected.areaName);
             }
+        });
+
+        // Selecting / de-selecting climb syle chips
+        binding.chipGroupPlanStyles.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            List<ClimbingStyle> climbTypes = checkedIds.stream().map(integer -> {
+                switch (integer) {
+                    case R.id.planStyleChipSport: return ClimbingStyle.SPORT;
+                    case R.id.planStyleChipTrad: return ClimbingStyle.TRADITIONAL;
+                    case R.id.planStyleChipTR: return ClimbingStyle.TOPROPE;
+                    case R.id.planStyleChipBoulder: return ClimbingStyle.BOULDER;
+                    default: return ClimbingStyle.UNKNOWN;
+                }
+            }).collect(Collectors.toList());
+            planTripViewModel.setPlanClimbStyles(climbTypes);
         });
 
         return root;

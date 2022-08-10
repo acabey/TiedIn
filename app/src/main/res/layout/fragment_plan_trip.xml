@@ -136,12 +136,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_margin="8dp"
-                    android:layout_weight="80">
+                    android:layout_weight="80"
+                    app:selectionRequired="true"
+                    app:singleSelection="false">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/planStyleChipSport"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:text="Sport" />
 
                     <com.google.android.material.chip.Chip
@@ -149,6 +152,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="10"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:text="Trad" />
 
                     <com.google.android.material.chip.Chip
@@ -156,6 +160,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="10"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:text="Top Rope" />
 
                     <com.google.android.material.chip.Chip
@@ -163,6 +168,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="10"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:text="Boulder" />
 
                 </com.google.android.material.chip.ChipGroup>
