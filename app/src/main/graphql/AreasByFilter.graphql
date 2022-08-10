@@ -1,0 +1,11 @@
+query AreasByFilter($filter: Filter) {
+    areas(filter: $filter) {
+        areaName
+        id
+        uuid
+        metadata {
+            lng
+            lat
+        }
+    }
+}

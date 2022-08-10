@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
+import android.widget.MultiAutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +18,9 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 
@@ -59,7 +64,13 @@ public class PlanTripFragment extends Fragment {
             planTripViewModel.setPlanDate(date);
         });
 
+//        ArrayList<String> crags = new ArrayList<>(Arrays.asList("Rumney", "Gunks", "Echo"));
+//        ArrayAdapter<String> testAdapter = new ArrayAdapter<>
+//                (getActivity(), android.R.layout.select_dialog_item, crags);
 
+        ClimbingAreaSuggestFilter areaSuggestFilter = new ClimbingAreaSuggestFilter(getActivity(), android.R.layout.simple_dropdown_item_1line);
+        binding.editTextPlanArea.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        binding.editTextPlanArea.setAdapter(areaSuggestFilter);
 
         return root;
     }

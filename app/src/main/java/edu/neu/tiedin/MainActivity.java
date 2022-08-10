@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         email = sharedpreferences.getString(USER_KEY, null);
 
         ApolloClient.Builder builder = new ApolloClient.Builder()
-                .serverUrl("https://api.openbeta.io/");
+                .serverUrl(getString(R.string.OPENBETA_ENDPOINT_ADDRESS));
 
 
         // Optionally, set a normalized cache
