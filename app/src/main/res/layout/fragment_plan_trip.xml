@@ -35,16 +35,17 @@
                         android:layout_weight="10"
                         app:srcCompat="@android:drawable/ic_menu_recent_history" />
 
-                    <EditText
+                    <TextView
                         android:id="@+id/editTextPlanDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
                         android:layout_weight="80"
                         android:ems="10"
-                        android:enabled="false"
-                        android:hint="Date"
-                        android:inputType="text"
+                        android:background="?attr/editTextBackground"
+                        android:textColor="?attr/editTextColor"
+                        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+                        android:text="Date"
                         android:minHeight="48dp" />
 
                 </LinearLayout>
