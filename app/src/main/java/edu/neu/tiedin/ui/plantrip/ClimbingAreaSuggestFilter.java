@@ -1,12 +1,16 @@
 package edu.neu.tiedin.ui.plantrip;
 
 import android.content.Context;
-import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.apollographql.apollo3.ApolloCall;
 import com.apollographql.apollo3.ApolloClient;
@@ -19,25 +23,26 @@ import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerato
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.type.AreaFilter;
 import io.reactivex.rxjava3.core.Single;
 
-class ClimbingAreaSuggestFilter extends ArrayAdapter<String> implements Filterable {
+class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> implements Filterable {
 
     private final String TAG = "ClimbingAreaSuggestFilter";
-    private ArrayList<String> data;
+    private ArrayList<AreasByFilterQuery.Area> areasList;
+    private ArrayList<AreasByFilterQuery.Area> tempAreasList;
     ApolloClient client;
     Filter filter;
+    Context context;
 
     public ClimbingAreaSuggestFilter(@NonNull Context context, int resource) {
         super(context, resource);
-        data = new ArrayList<>();
+        this.context = context;
+        areasList = new ArrayList<>();
+        tempAreasList = new ArrayList<>();
         ApolloClient.Builder builder = new ApolloClient.Builder()
                 .serverUrl(context.getString(R.string.OPENBETA_ENDPOINT_ADDRESS));
 
@@ -73,11 +78,19 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<String> implements Filterab
                 Single<ApolloResponse<AreasByFilterQuery.Data>> queryResponse = Rx3Apollo.single(cragsByName);
 
                 queryResponse.blockingSubscribe(dataApolloResponse -> {
-                    data.clear();
-                    data.addAll(dataApolloResponse.data.areas.stream().map(area -> area.areaName).collect(Collectors.toList()));
 
-                    results.values = data;
-                    results.count = data.size();
+                    // Always clear
+                    tempAreasList.clear();
+
+                    // Only try to update if there are actual results
+                    if (!dataApolloResponse.hasErrors() &&
+                            dataApolloResponse.data.areas != null &&
+                            dataApolloResponse.data.areas.size() > 0) {
+                        tempAreasList.addAll(dataApolloResponse.data.areas);
+                    }
+
+                    results.values = tempAreasList;
+                    results.count = tempAreasList.size();
                 });
 
                 return results;
@@ -86,20 +99,48 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<String> implements Filterab
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
+                    areasList.clear();
+                    areasList.addAll(tempAreasList);
                     notifyDataSetChanged();
                 } else notifyDataSetInvalidated();
+            }
+
+            @Override
+            public CharSequence convertResultToString(Object resultValue) {
+                if (resultValue == null) {
+                    return "null";
+                } else if (!(resultValue instanceof AreasByFilterQuery.Area)) {
+                    return "null";
+                } else {
+                    return ((AreasByFilterQuery.Area) resultValue).areaName;
+                }
             }
         };
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return data.size();
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        View listItem = convertView;
+        if(listItem == null)
+            listItem = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1,parent,false);
+
+        AreasByFilterQuery.Area currentArea = areasList.get(position);
+
+        TextView name = (TextView) listItem.findViewById(android.R.id.text1);
+        name.setText(currentArea.areaName);
+
+        return listItem;
     }
 
     @Override
-    public String getItem(int position) {
-        return data.get(position);
+    public int getCount() {
+        return areasList.size();
+    }
+
+    @Override
+    public AreasByFilterQuery.Area getItem(int position) {
+        return areasList.get(position);
     }
 
     @NonNull

@@ -1,9 +1,11 @@
 package edu.neu.tiedin.ui.plantrip;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.MultiAutoCompleteTextView;
@@ -25,6 +27,8 @@ import java.util.List;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 
 public class PlanTripFragment extends Fragment {
+
+    private static final String TAG = "PlanTripFragment";
 
     private FirebaseDatabase firebaseDatabase;
     private FragmentPlanTripBinding binding;
@@ -69,8 +73,16 @@ public class PlanTripFragment extends Fragment {
 //                (getActivity(), android.R.layout.select_dialog_item, crags);
 
         ClimbingAreaSuggestFilter areaSuggestFilter = new ClimbingAreaSuggestFilter(getActivity(), android.R.layout.simple_dropdown_item_1line);
-        binding.editTextPlanArea.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
         binding.editTextPlanArea.setAdapter(areaSuggestFilter);
+        binding.editTextPlanArea.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                String selected = (String) parent.getItemAtPosition(position);
+//                int pos = Arrays.asList().indexOf(selected);
+//                Log.d(TAG, "onItemClick: " + selected);
+            }
+        });
+
 
         return root;
     }
