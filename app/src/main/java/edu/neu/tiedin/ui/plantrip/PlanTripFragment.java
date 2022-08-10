@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,10 @@ public class PlanTripFragment extends Fragment {
         View root = binding.getRoot();
 
         // Bind UI to ViewModel
+
+        // Datepicker minimum date is today
+        binding.dpWhenPicker.setMinDate(Calendar.getInstance().getTimeInMillis());
+
         // Date TextView gets date value
         planTripViewModel.getPlanDate().observe(getViewLifecycleOwner(), localDate -> {
             // "<Day of week>, <Month of Year> <day of month" e.g. Tuesday, August 9
