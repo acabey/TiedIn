@@ -17,6 +17,7 @@ import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
 import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.FirebaseDatabase;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -25,6 +26,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.ActivityMainBinding;
 import edu.neu.tiedin.type.Point;
 import io.reactivex.rxjava3.core.Single;
@@ -33,18 +35,23 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    public static final String SHARED_PREFS = "LOGIN_PREFS";
-    public static final String USER_KEY = "USER_SESSION_KEY";
+    public String SHARED_PREFS;
+    public String USER_KEY;
+
+    private FirebaseDatabase firebaseDatabase;
+    private SharedPreferences sharedpreferences;
+    private String userId;
+    private User activeUser;
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
 
-    SharedPreferences sharedpreferences;
-    String email, password;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SHARED_PREFS = getString(R.string.sessionLoginPrefsKey);
+        USER_KEY = getString(R.string.sessionUserIdKey);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -64,8 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Get login preferences (if they exist)
         sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
-
-        email = sharedpreferences.getString(USER_KEY, null);
+        userId = sharedpreferences.getString(USER_KEY, null);
 
         ApolloClient.Builder builder = new ApolloClient.Builder()
                 .serverUrl(getString(R.string.OPENBETA_ENDPOINT_ADDRESS));
@@ -108,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void forceLogin() {
         // If there is an existing session, transition to Main
-        if (email == null) {
+        if (userId == null) {
             Log.d(TAG, "forceLogin: email not found, forcing login screen");
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);

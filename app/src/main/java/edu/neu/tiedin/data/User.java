@@ -7,12 +7,12 @@ import edu.neu.tiedin.types.ClimberProfile;
 public class User {
 
     private String _id;
-    private String name;
-    private String email;
-    private String phoneNumber;
+    private java.lang.String name;
+    private java.lang.String email;
+    private java.lang.String phoneNumber;
     private ClimberProfile profile;
 
-    public User(String _id, String name, String email, String phoneNumber, ClimberProfile profile) {
+    public User(java.lang.String _id, java.lang.String name, java.lang.String email, java.lang.String phoneNumber, ClimberProfile profile) {
         this._id = _id;
         this.name = name;
         this.email = email;
@@ -20,35 +20,35 @@ public class User {
         this.profile = profile;
     }
 
-    public String get_id() {
+    public java.lang.String get_id() {
         return _id;
     }
 
-    public void set_id(String _id) {
+    public void set_id(java.lang.String _id) {
         this._id = _id;
     }
 
-    public String getName() {
+    public java.lang.String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(java.lang.String name) {
         this.name = name;
     }
 
-    public String getEmail() {
+    public java.lang.String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(java.lang.String email) {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
+    public java.lang.String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhoneNumber(java.lang.String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 

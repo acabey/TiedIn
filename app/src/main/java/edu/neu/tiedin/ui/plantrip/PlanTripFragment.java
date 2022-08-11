@@ -1,8 +1,8 @@
 package edu.neu.tiedin.ui.plantrip;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +12,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -22,7 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -32,24 +33,37 @@ import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
-import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 import edu.neu.tiedin.types.ClimbingStyle;
 import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
+import edu.neu.tiedin.ui.home.HomeFragment;
 
 public class PlanTripFragment extends Fragment {
 
-    private static final String TAG = "PlanTripFragment";
+    private static final java.lang.String TAG = "PlanTripFragment";
+
+    public String SHARED_PREFS;
+    public String USER_KEY;
 
     private FirebaseDatabase firebaseDatabase;
+    private SharedPreferences sharedpreferences;
+    private String userId;
+
     private FragmentPlanTripBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SHARED_PREFS = getString(R.string.sessionLoginPrefsKey);
+        USER_KEY = getString(R.string.sessionUserIdKey);
 
         // Connect with firebase
         firebaseDatabase = FirebaseDatabase.getInstance();
+
+        // Get login preferences
+        sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        userId = sharedpreferences.getString(USER_KEY, null);
+        assert (userId != null); // MainActivity should force login
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -153,13 +167,12 @@ public class PlanTripFragment extends Fragment {
 
         // Post button binding
         binding.btnPostPlannedTrip.setOnClickListener(v -> {
+
             // Create Trip Plan Object from fields
-            User user = new User();
             ClimbingTrip trip = new ClimbingTrip(
-                    // Get current user??
-                    user,
+                    userId,
                     Collections.emptyList(),
-                    planTripViewModel.getPlanDate().getValue(),
+                    planTripViewModel.getPlanDate().getValue().toEpochDay(),
                     planTripViewModel.getPlanAreas().getValue().stream().map(ComposedArea::fromAreaFilterQuery).collect(Collectors.toList()),
                     planTripViewModel.getPlanClimbStyles().getValue(),
                     planTripViewModel.getPlanDetails().getValue()
@@ -168,10 +181,11 @@ public class PlanTripFragment extends Fragment {
             Task<Void> dbPostMessage = firebaseDatabase.getReference().child("trips").push().setValue(trip);
             dbPostMessage.addOnCompleteListener((OnCompleteListener<Void>) completedPostTrip -> {
                 if(completedPostTrip.isSuccessful()){
-                    Toast.makeText(getActivity(),"Posted new trip: ",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Posted new trip: ",Toast.LENGTH_SHORT).show();
+                    switchFragments();
                 }
                 else {
-                    Toast.makeText(getActivity(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -184,5 +198,9 @@ public class PlanTripFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void switchFragments() {
+        NavHostFragment.findNavController(this).navigate(R.id.nav_home);
     }
 }
