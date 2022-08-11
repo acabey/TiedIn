@@ -1,19 +1,21 @@
 package edu.neu.tiedin.ui.home;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
+
+import edu.neu.tiedin.data.ClimbingTrip;
+
 public class HomeViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
+    private final MutableLiveData<ArrayList<ClimbingTrip>> trips;
 
     public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+        trips = new MutableLiveData<>(new ArrayList<>());
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public MutableLiveData<ArrayList<ClimbingTrip>> getTrips() {
+        return trips;
     }
 }
