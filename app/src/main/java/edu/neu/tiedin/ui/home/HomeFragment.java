@@ -3,6 +3,7 @@ package edu.neu.tiedin.ui.home;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
@@ -22,6 +37,7 @@ import edu.neu.tiedin.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
 
+    private static final String TAG = "HomeFragment";
     public String SHARED_PREFS;
     public String USER_KEY;
 
@@ -31,7 +47,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
 
     private RecyclerView.LayoutManager tripViewLayoutManager;
-    private RecyclerView.Adapter tripAdapter;
+    private TripAdapter tripAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,10 +73,57 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Get current trips
+        final CollectionReference colRef = firestoreDatabase.collection("trips");
+        colRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().getDocuments() != null) {
+                Log.i(TAG, "HomeFragment: pulled down trips " + task.getResult().getDocuments().size());
+                tripAdapter.addTrips(
+                        task.getResult().getDocuments()
+                                .stream()
+                                .map(
+                                (Function<DocumentSnapshot, ClimbingTrip>) documentSnapshot ->
+                                        documentSnapshot.toObject(ClimbingTrip.class))
+                                .collect(Collectors.toList()));
+            } else {
+                Log.e(TAG, "HomeFragment: failed to pull down Trips");
+            }
+        });
+
+        // Listen for ongoing changes in trips
+        ListenerRegistration listenerRegistration = colRef.addSnapshotListener((snapshot, e) -> {
+            if (e != null) {
+                Log.w(TAG, "Listen failed.", e);
+                return;
+            }
+
+            if (snapshot != null && !snapshot.getDocumentChanges().isEmpty()) {
+                for (DocumentChange change : snapshot.getDocumentChanges()) {
+                    if (change.getType() == DocumentChange.Type.ADDED) {
+                        Log.d(TAG, "Added data: " + change.getDocument().getData());
+                        tripAdapter.addTrip(change.getDocument().toObject(ClimbingTrip.class));
+                    } else if (change.getType() == DocumentChange.Type.REMOVED) {
+                        Log.d(TAG, "Removed data: " + change.getDocument().getData());
+                        tripAdapter.removeTrip(change.getDocument().toObject(ClimbingTrip.class));
+                    } else if (change.getType() == DocumentChange.Type.MODIFIED) {
+                        Log.d(TAG, "Modified data: " + change.getDocument().getData());
+                        tripAdapter.modifyTrip(change
+                                .getDocument()
+                                .toObject(ClimbingTrip.class));
+                    } else {
+                        Log.d(TAG, "Unknown data change: " + change.getDocument().getData());
+                    }
+                }
+            } else {
+                Log.d(TAG, "Current data: null");
+            }
+        });
+
         // Configure trip pull from DB
         tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext());
 
         // Configure Climb recyclerview
+        tripViewLayoutManager = new LinearLayoutManager(getContext());
         binding.recyclerViewListTrips.setAdapter(tripAdapter);
         binding.recyclerViewListTrips.setLayoutManager(tripViewLayoutManager);
 

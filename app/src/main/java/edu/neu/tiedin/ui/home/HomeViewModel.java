@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.neu.tiedin.data.ClimbingTrip;
 
@@ -17,5 +18,9 @@ public class HomeViewModel extends ViewModel {
 
     public MutableLiveData<ArrayList<ClimbingTrip>> getTrips() {
         return trips;
+    }
+
+    public void addTrips(List<ClimbingTrip> newTrips) {
+        this.trips.getValue().addAll(newTrips);
     }
 }

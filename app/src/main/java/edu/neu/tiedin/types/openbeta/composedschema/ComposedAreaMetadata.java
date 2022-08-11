@@ -15,6 +15,8 @@ public class ComposedAreaMetadata {
     public String mp_id;
     public String area_id, areaId;
 
+    public ComposedAreaMetadata() {}
+
     public ComposedAreaMetadata(Boolean isDestination, Boolean leaf, Double lat, Double lng, List<Double> bbox, Integer left_right_index, Integer leftRightIndex, String mp_id, String area_id, String areaId) {
         this.isDestination = isDestination;
         this.leaf = leaf;

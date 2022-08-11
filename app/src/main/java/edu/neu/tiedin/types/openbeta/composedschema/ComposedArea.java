@@ -54,6 +54,8 @@ public class ComposedArea {
     @Nullable
     public List<ComposedMediaTagType> media;
 
+    public ComposedArea() {}
+
     public ComposedArea(@Nullable String id, @Nullable String uuid, @Nullable String area_name, @Nullable String areaName, @Nullable ComposedAreaMetadata metadata, @Nullable List<ComposedClimb> climbs, @Nullable List<ComposedClimb> children, @Nullable List<String> ancestors, @Nullable Object aggregate, @Nullable ComposedContent content, @Nullable String pathHash, @Nullable List<String> pathTokens, Float density, @Nullable Integer totalClimbs, @Nullable List<ComposedMediaTagType> media) {
         this.id = id;
         this.uuid = uuid;

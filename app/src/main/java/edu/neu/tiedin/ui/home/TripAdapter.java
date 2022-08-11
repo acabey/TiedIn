@@ -2,6 +2,7 @@ package edu.neu.tiedin.ui.home;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
+import edu.neu.tiedin.type.Climb;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
+    private static final String TAG = "TripAdapter";
     private ArrayList<ClimbingTrip> trips;
     private Context context;
 
@@ -46,6 +51,29 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return trips.size();
+    }
+
+    public void addTrips(Collection<ClimbingTrip> newTrips) {
+        int priorSize = this.trips.size();
+        this.trips.addAll(newTrips);
+        notifyItemRangeInserted(priorSize, newTrips.size());
+    }
+
+    public void addTrip(ClimbingTrip newTrip) {
+        trips.add(newTrip);
+        notifyItemInserted(trips.size());
+    }
+
+    public void removeTrip(ClimbingTrip newTrip) {
+        if (trips.contains(newTrip)) {
+            trips.remove(newTrip);
+            notifyItemRemoved(trips.size());
+        }
+    }
+
+    public void modifyTrip(ClimbingTrip modifiedTrip) {
+        // TODO
+        Log.d(TAG, "modifyTrip: Modification of trips is not implemented");
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

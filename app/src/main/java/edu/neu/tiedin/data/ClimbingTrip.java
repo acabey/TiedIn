@@ -16,6 +16,8 @@ public class ClimbingTrip {
     private List<ClimbingStyle> styles;
     private String details;
 
+    public ClimbingTrip() {}
+
     public ClimbingTrip(String organizerUserId, List<String> participantUserIds, Long epochDate, List<ComposedArea> areas, List<ClimbingStyle> styles, String details) {
         this.organizerUserId = organizerUserId;
         this.participantUserIds = participantUserIds;

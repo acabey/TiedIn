@@ -6,6 +6,8 @@ public class ComposedContent {
 
     public String description, location, protection;
 
+    public ComposedContent() {}
+
     public ComposedContent(String description, String location, String protection) {
         this.description = description;
         this.location = location;

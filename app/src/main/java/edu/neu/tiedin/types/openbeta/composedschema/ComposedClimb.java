@@ -14,6 +14,8 @@ public class ComposedClimb {
     public List<String> pathTokens, ancestors;
     public List<ComposedMediaTagType> media;
 
+    public ComposedClimb() {}
+
     public ComposedClimb(String id, String uuid, String name, String fa, String yds, ComposedClimbType type, ComposedSafetyEnum safety, ComposedClimbMetadata metadata, ComposedContent content, List<String> pathTokens, List<String> ancestors, List<ComposedMediaTagType> media) {
         this.id = id;
         this.uuid = uuid;

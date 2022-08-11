@@ -9,6 +9,8 @@ import edu.neu.tiedin.types.ClimbingStyle;
 public class ComposedClimbType {
     public Boolean trad, sport, bouldering, alpine, mixed, aid, tr;
 
+    public ComposedClimbType() {}
+
     public ComposedClimbType(Boolean trad, Boolean sport, Boolean bouldering, Boolean alpine, Boolean mixed, Boolean aid, Boolean tr) {
         this.trad = trad;
         this.sport = sport;
