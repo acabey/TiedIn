@@ -18,6 +18,7 @@ import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerato
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public String SHARED_PREFS;
     public String USER_KEY;
 
-    private FirebaseDatabase firebaseDatabase;
+    private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
     private String userId;
     private User activeUser;

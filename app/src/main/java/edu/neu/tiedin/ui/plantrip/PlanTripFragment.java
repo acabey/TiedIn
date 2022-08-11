@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -20,7 +19,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,7 +36,6 @@ import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 import edu.neu.tiedin.types.ClimbingStyle;
 import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
-import edu.neu.tiedin.ui.home.HomeFragment;
 
 public class PlanTripFragment extends Fragment {
 
@@ -45,7 +44,7 @@ public class PlanTripFragment extends Fragment {
     public String SHARED_PREFS;
     public String USER_KEY;
 
-    private FirebaseDatabase firebaseDatabase;
+    private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
     private String userId;
 
@@ -58,7 +57,7 @@ public class PlanTripFragment extends Fragment {
         USER_KEY = getString(R.string.sessionUserIdKey);
 
         // Connect with firebase
-        firebaseDatabase = FirebaseDatabase.getInstance();
+        firestoreDatabase = FirebaseFirestore.getInstance();
 
         // Get login preferences
         sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
@@ -103,6 +102,9 @@ public class PlanTripFragment extends Fragment {
 
         // Clicking an area from the autocomplete adds to the list of areas
         binding.editTextPlanArea.setOnItemClickListener((parent, view, position, id) -> {
+            // Clear error in textbox (if any)
+            binding.editTextPlanArea.setError(null);
+
             AreasByFilterQuery.Area selected = (AreasByFilterQuery.Area) parent.getItemAtPosition(position);
             if (selected != null) {
                 // Add data to ViewModel
@@ -178,8 +180,21 @@ public class PlanTripFragment extends Fragment {
                     planTripViewModel.getPlanDetails().getValue()
             );
 
-            Task<Void> dbPostMessage = firebaseDatabase.getReference().child("trips").push().setValue(trip);
-            dbPostMessage.addOnCompleteListener((OnCompleteListener<Void>) completedPostTrip -> {
+            // Validate trip settings
+            if (trip.getEpochDate() == null) {
+                Toast.makeText(getContext(),"Must select date for trip",Toast.LENGTH_SHORT).show();
+                return;
+            } else if(trip.getAreas() == null || trip.getAreas().isEmpty()) {
+                Toast.makeText(getContext(),"Must select at least one area",Toast.LENGTH_SHORT).show();
+                binding.editTextPlanArea.setError("Add a climbing area");
+                return;
+            } else if(trip.getStyles() == null || trip.getStyles().isEmpty()) {
+                Toast.makeText(getContext(),"Must select at least one climbing style",Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Task<DocumentReference> dbPostMessage = firestoreDatabase.collection("trips").add(trip);
+            dbPostMessage.addOnCompleteListener((OnCompleteListener<DocumentReference>) completedPostTrip -> {
                 if(completedPostTrip.isSuccessful()){
                     Toast.makeText(getContext(),"Posted new trip: ",Toast.LENGTH_SHORT).show();
                     switchFragments();
