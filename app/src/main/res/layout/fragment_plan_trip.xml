@@ -1,265 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.findtrip.FindTripFragment">
+<layout>
+    <data>
+        <variable
+            name="planTripViewModel"
+            type="edu.neu.tiedin.ui.plantrip.PlanTripViewModel" />
+    </data>
 
-    <LinearLayout
+    <ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_height="match_parent"
+        tools:context=".ui.findtrip.FindTripFragment">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="2dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="10"
-                        app:srcCompat="@android:drawable/ic_menu_recent_history" />
-
-                    <TextView
-                        android:id="@+id/editTextPlanDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:layout_weight="80"
-                        android:ems="10"
-                        android:background="?attr/editTextBackground"
-                        android:textColor="?attr/editTextColor"
-                        android:textAppearance="?android:attr/textAppearanceMediumInverse"
-                        android:text="Date"
-                        android:minHeight="48dp" />
-
-                </LinearLayout>
-
-                <DatePicker
-                    android:id="@+id/dpWhenPicker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="8dp"
-                    android:datePickerMode="calendar"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:visibility="visible"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="2dp"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="10"
-                        app:srcCompat="@android:drawable/ic_menu_compass" />
-
-                    <AutoCompleteTextView
-                        android:id="@+id/editTextPlanArea"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:layout_weight="80"
-                        android:completionThreshold="3"
-                        android:ems="10"
-                        android:hint="Climbing Area"
-                        android:inputType="textPersonName"
-                        android:minHeight="48dp" />
-                </LinearLayout>
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupPlanAreas"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:layout_weight="80"/>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="10"
-                    app:srcCompat="@android:drawable/ic_dialog_info" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupPlanStyles"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:layout_weight="80"
-                    app:selectionRequired="true"
-                    app:singleSelection="false">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/planStyleChipSport"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:text="Sport" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/planStyleChipTrad"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="10"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:text="Trad" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/planStyleChipTR"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="10"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:text="Top Rope" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/planStyleChipBoulder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="10"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:text="Boulder" />
-
-                </com.google.android.material.chip.ChipGroup>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:visibility="visible"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="2dp"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="10"
-                        app:srcCompat="@android:drawable/ic_menu_myplaces" />
-
-                    <MultiAutoCompleteTextView
-                        android:id="@+id/planObjectivesValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:layout_weight="80"
-                        android:ems="10"
-                        android:hint="Objectives"
-                        android:inputType="textPersonName" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:weightSum="100">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="10"
-                    app:srcCompat="@android:drawable/ic_menu_info_details" />
-
-                <EditText
-                    android:id="@+id/planDetailsValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_weight="80"
-                    android:autoLink="all"
-                    android:gravity="top|left"
-                    android:hint="Details"
-                    android:inputType="textMultiLine|textCapSentences"
-                    android:lines="5"
-                    android:maxLines="10"
-                    android:minLines="1"
-                    android:scrollbars="none" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <Button
-            android:id="@+id/btnPostPlannedTrip"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Post Trip!" />
+            android:orientation="vertical" >
 
-    </LinearLayout>
-</ScrollView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="10"
+                            app:srcCompat="@android:drawable/ic_menu_recent_history" />
+
+                        <TextView
+                            android:id="@+id/editTextPlanDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:layout_weight="80"
+                            android:ems="10"
+                            android:background="?attr/editTextBackground"
+                            android:textColor="?attr/editTextColor"
+                            android:textAppearance="?android:attr/textAppearanceMediumInverse"
+                            android:text="Date"
+                            android:minHeight="48dp" />
+
+                    </LinearLayout>
+
+                    <DatePicker
+                        android:id="@+id/dpWhenPicker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="8dp"
+                        android:datePickerMode="calendar"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="visible"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="2dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="10"
+                            app:srcCompat="@android:drawable/ic_menu_compass" />
+
+                        <AutoCompleteTextView
+                            android:id="@+id/editTextPlanArea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:layout_weight="80"
+                            android:completionThreshold="3"
+                            android:ems="10"
+                            android:hint="Climbing Area"
+                            android:inputType="textPersonName"
+                            android:minHeight="48dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupPlanAreas"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="8dp"
+                        android:layout_weight="80"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="10"
+                        app:srcCompat="@android:drawable/ic_dialog_info" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupPlanStyles"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_margin="8dp"
+                        android:layout_weight="80"
+                        app:selectionRequired="true"
+                        app:singleSelection="false">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/planStyleChipSport"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:text="Sport" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/planStyleChipTrad"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="10"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:text="Trad" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/planStyleChipTR"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="10"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:text="Top Rope" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/planStyleChipBoulder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="10"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:text="Boulder" />
+
+                    </com.google.android.material.chip.ChipGroup>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="visible"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="2dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="10"
+                            app:srcCompat="@android:drawable/ic_menu_myplaces" />
+
+                        <MultiAutoCompleteTextView
+                            android:id="@+id/planObjectivesValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:layout_weight="80"
+                            android:ems="10"
+                            android:hint="Objectives"
+                            android:inputType="textPersonName" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="100">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="10"
+                        app:srcCompat="@android:drawable/ic_menu_info_details" />
+
+                    <EditText
+                        android:id="@+id/planDetailsValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:layout_weight="80"
+                        android:autoLink="all"
+                        android:gravity="top|left"
+                        android:hint="Details"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:lines="5"
+                        android:maxLines="10"
+                        android:minLines="1"
+                        android:scrollbars="none"
+                        android:text="@={planTripViewModel.planDetails}"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <Button
+                android:id="@+id/btnPostPlannedTrip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Post Trip!" />
+
+        </LinearLayout>
+    </ScrollView>
+</layout>

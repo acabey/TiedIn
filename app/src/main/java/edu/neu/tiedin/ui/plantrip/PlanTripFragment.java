@@ -1,6 +1,8 @@
 package edu.neu.tiedin.ui.plantrip;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -138,6 +140,24 @@ public class PlanTripFragment extends Fragment {
                 binding.chipGroupPlanAreas.addView(areaChip);
 
                 Log.d(TAG, "onItemClick: " + selected.id);
+            }
+        });
+
+        // Bind Details text with View
+        binding.planDetailsValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
