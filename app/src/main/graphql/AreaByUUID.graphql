@@ -25,6 +25,17 @@ query AreaByUUID($uuid: ID) {
         climbs {
             id
             uuid
+            name
+            type {
+                trad
+                sport
+                bouldering
+                alpine
+                mixed
+                aid
+                tr
+            }
+            yds
         }
         content {
             description

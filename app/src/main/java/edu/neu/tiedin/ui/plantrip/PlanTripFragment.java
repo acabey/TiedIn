@@ -112,6 +112,33 @@ public class PlanTripFragment extends Fragment {
             planTripViewModel.setPlanClimbStyles(climbTypes);
         });
 
+        // Autocomplete Objective search
+        ObjectiveSuggestFilter objectiveSuggestFilter = new ObjectiveSuggestFilter(getActivity(), android.R.layout.simple_dropdown_item_1line);
+        areaSuggestFilter.get
+        binding.planObjectivesValue.setAdapter(areaSuggestFilter);
+
+        // Clicking an area from the autocomplete adds to the list of areas
+        binding.planObjectivesValue.setOnItemClickListener((parent, view, position, id) -> {
+            // selected = (AreasByFilterQuery.Area) parent.getItemAtPosition(position);
+            if (selected != null) {
+                // Add data to ViewModel
+                planTripViewModel.addPlannedArea(selected);
+
+                // Add chip to UI
+                Chip areaChip = new Chip(getContext(), null, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
+                ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(getContext(), null, 0, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
+                areaChip.setChipDrawable(chipDrawable);
+                areaChip.setText(selected.areaName);
+                areaChip.setOnCloseIconClickListener(v -> {
+                    planTripViewModel.removePlannedArea(selected);
+                    binding.chipGroupPlanAreas.removeView(areaChip);
+                });
+                binding.chipGroupPlanAreas.addView(areaChip);
+
+                Log.d(TAG, "onItemClick: " + selected.areaName);
+            }
+        });
+
         return root;
     }
 

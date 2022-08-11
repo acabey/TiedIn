@@ -1,6 +1,7 @@
 package edu.neu.tiedin.ui.plantrip;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,37 +16,50 @@ import androidx.annotation.Nullable;
 import com.apollographql.apollo3.ApolloCall;
 import com.apollographql.apollo3.ApolloClient;
 import com.apollographql.apollo3.api.ApolloResponse;
-import com.apollographql.apollo3.api.Optional;
+import com.apollographql.apollo3.api.Operation;
 import com.apollographql.apollo3.cache.normalized.NormalizedCache;
 import com.apollographql.apollo3.cache.normalized.api.FieldPolicyCacheResolver;
 import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
 import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 
+import org.reactivestreams.Subscriber;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.R;
-import edu.neu.tiedin.type.AreaFilter;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.internal.operators.flowable.FlowableConcatArray;
+import io.reactivex.rxjava3.internal.operators.flowable.FlowableConcatMap;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import kotlinx.coroutines.flow.Flow;
 
-class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> implements Filterable {
+public class ObjectiveSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> implements Filterable {
 
-    private final String TAG = "ClimbingAreaSuggestFilter";
-    private ArrayList<AreasByFilterQuery.Area> areasList;
-    private ArrayList<AreasByFilterQuery.Area> tempAreasList;
+    private final String TAG = "ObjectiveSuggestFilter";
+
+    private List<AreasByFilterQuery.Area> areasToSearch;
+
+    private ArrayList<AreaByUUIDQuery.Climb> climbList;
+    private ArrayList<AreaByUUIDQuery.Climb> tempClimbList;
     ApolloClient client;
     Filter filter;
     Context context;
 
-    public ClimbingAreaSuggestFilter(@NonNull Context context, int resource) {
+    public ObjectiveSuggestFilter(@NonNull Context context, int resource, List<AreasByFilterQuery.Area> areasToSearch) {
         super(context, resource);
         this.context = context;
-        areasList = new ArrayList<>();
-        tempAreasList = new ArrayList<>();
+        this.areasToSearch = areasToSearch;
+
+        climbList = new ArrayList<>();
+        tempClimbList = new ArrayList<>();
         ApolloClient.Builder builder = new ApolloClient.Builder()
                 .serverUrl(context.getString(R.string.OPENBETA_ENDPOINT_ADDRESS));
 
@@ -70,30 +84,30 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> im
                     return results;
                 }
 
-                // Partial match Area name with given search term
-                ApolloCall<AreasByFilterQuery.Data> cragsByName = client.query(new AreasByFilterQuery(new edu.neu.tiedin.type.Filter(
-                        new Optional.Present<>(new AreaFilter(constraint.toString(), new Optional.Present<>(false))),
-                        Optional.Absent.INSTANCE,
-                        Optional.Absent.INSTANCE,
-                        Optional.Absent.INSTANCE
-                )));
+                // Query each area (crag) by UUID in order to collect all of their climbs for the search
+                List<ApolloCall<AreaByUUIDQuery.Data>> cragByUUIDQueries = areasToSearch.stream().map(
+                        area -> client.query(new AreaByUUIDQuery(area.uuid))).collect(Collectors.toList());
 
-                Single<ApolloResponse<AreasByFilterQuery.Data>> queryResponse = Rx3Apollo.single(cragsByName);
+                // Flow all requests in parallel
+                Flowable<ApolloCall<AreaByUUIDQuery.Data>> parallelRequest = new FlowableConcatArray<ApolloCall<AreaByUUIDQuery.Data>>(cragByUUIDQueries)
+                        .parallel()
+                        .runOn(Schedulers.io());
 
-                queryResponse.blockingSubscribe(dataApolloResponse -> {
 
-                    // Always clear
-                    tempAreasList.clear();
+                // Always clear
+                tempClimbList.clear();
+                Rx3Apollo.flowable(parallelRequest).blockingSubscribe(genericResponse -> {
+                    ApolloResponse<AreaByUUIDQuery.Data> dataApolloResponse = (ApolloResponse<AreaByUUIDQuery.Data>) genericResponse;
 
                     // Only try to update if there are actual results
                     if (!dataApolloResponse.hasErrors() &&
-                            dataApolloResponse.data.areas != null &&
-                            dataApolloResponse.data.areas.size() > 0) {
-                        tempAreasList.addAll(dataApolloResponse.data.areas);
+                            dataApolloResponse.data.area.climbs != null &&
+                            dataApolloResponse.data.area.climbs.size() > 0) {
+                        tempClimbList.addAll(dataApolloResponse.data.area.climbs);
                     }
 
-                    results.values = tempAreasList;
-                    results.count = tempAreasList.size();
+                    results.values = tempClimbList;
+                    results.count = tempClimbList.size();
                 });
 
                 return results;
@@ -102,8 +116,8 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> im
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
-                    areasList.clear();
-                    areasList.addAll(tempAreasList);
+                    climbList.clear();
+                    climbList.addAll(tempClimbList);
                     notifyDataSetChanged();
                 } else notifyDataSetInvalidated();
             }
@@ -155,9 +169,5 @@ class ClimbingAreaSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> im
     @Override
     public Filter getFilter() {
         return filter;
-    }
-
-    public List<AreasByFilterQuery.Area> getAreasData() {
-        return Collections.unmodifiableList(areasList);
     }
 }
