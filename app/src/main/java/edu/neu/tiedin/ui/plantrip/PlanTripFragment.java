@@ -35,6 +35,7 @@ import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
 import edu.neu.tiedin.types.ClimbingStyle;
+import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class PlanTripFragment extends Fragment {
 
@@ -159,7 +160,7 @@ public class PlanTripFragment extends Fragment {
                     user,
                     Collections.emptyList(),
                     planTripViewModel.getPlanDate().getValue(),
-                    planTripViewModel.getPlanAreas().getValue(),
+                    planTripViewModel.getPlanAreas().getValue().stream().map(ComposedArea::fromAreaFilterQuery).collect(Collectors.toList()),
                     planTripViewModel.getPlanClimbStyles().getValue(),
                     planTripViewModel.getPlanDetails().getValue()
             );

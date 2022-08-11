@@ -6,16 +6,17 @@ import java.util.Objects;
 
 import edu.neu.tiedin.type.Area;
 import edu.neu.tiedin.types.ClimbingStyle;
+import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class ClimbingTrip {
     private User organizer;
     private List<User> participants;
     private LocalDate date;
-    private List<Area> areas;
+    private List<ComposedArea> areas;
     private List<ClimbingStyle> styles;
     private String details;
 
-    public ClimbingTrip(User organizer, List<User> participants, LocalDate date, List<Area> areas, List<ClimbingStyle> styles, String details) {
+    public ClimbingTrip(User organizer, List<User> participants, LocalDate date, List<ComposedArea> areas, List<ClimbingStyle> styles, String details) {
         this.organizer = organizer;
         this.participants = participants;
         this.date = date;
@@ -48,11 +49,11 @@ public class ClimbingTrip {
         this.date = date;
     }
 
-    public List<Area> getAreas() {
+    public List<ComposedArea> getAreas() {
         return areas;
     }
 
-    public void setAreas(List<Area> areas) {
+    public void setAreas(List<ComposedArea> areas) {
         this.areas = areas;
     }
 

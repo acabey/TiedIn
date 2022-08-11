@@ -1,4 +1,4 @@
 package edu.neu.tiedin.types.openbeta.composedschema;
 
-public class ComposedMetadata {
+public class ComposedSafetyEnum {
 }
