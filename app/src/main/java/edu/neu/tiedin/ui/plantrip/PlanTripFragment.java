@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.databinding.FragmentPlanTripBinding;
@@ -113,29 +114,30 @@ public class PlanTripFragment extends Fragment {
         });
 
         // Autocomplete Objective search
-        ObjectiveSuggestFilter objectiveSuggestFilter = new ObjectiveSuggestFilter(getActivity(), android.R.layout.simple_dropdown_item_1line);
-        areaSuggestFilter.get
-        binding.planObjectivesValue.setAdapter(areaSuggestFilter);
+        ObjectiveSuggestFilter objectiveSuggestFilter = new ObjectiveSuggestFilter(getActivity(),
+                android.R.layout.simple_dropdown_item_1line,
+                areaSuggestFilter.getAreasData());
+        binding.planObjectivesValue.setAdapter(objectiveSuggestFilter);
 
         // Clicking an area from the autocomplete adds to the list of areas
         binding.planObjectivesValue.setOnItemClickListener((parent, view, position, id) -> {
-            // selected = (AreasByFilterQuery.Area) parent.getItemAtPosition(position);
+            AreaByUUIDQuery.Climb selected = (AreaByUUIDQuery.Climb) parent.getItemAtPosition(position);
             if (selected != null) {
                 // Add data to ViewModel
-                planTripViewModel.addPlannedArea(selected);
+                planTripViewModel.addPlannedObjective(selected);
 
                 // Add chip to UI
                 Chip areaChip = new Chip(getContext(), null, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
                 ChipDrawable chipDrawable = ChipDrawable.createFromAttributes(getContext(), null, 0, com.google.android.material.R.style.Widget_MaterialComponents_Chip_Entry);
                 areaChip.setChipDrawable(chipDrawable);
-                areaChip.setText(selected.areaName);
+                areaChip.setText(selected.id);
                 areaChip.setOnCloseIconClickListener(v -> {
-                    planTripViewModel.removePlannedArea(selected);
+                    planTripViewModel.removePlannedObjective(selected);
                     binding.chipGroupPlanAreas.removeView(areaChip);
                 });
                 binding.chipGroupPlanAreas.addView(areaChip);
 
-                Log.d(TAG, "onItemClick: " + selected.areaName);
+                Log.d(TAG, "onItemClick: " + selected.id);
             }
         });
 

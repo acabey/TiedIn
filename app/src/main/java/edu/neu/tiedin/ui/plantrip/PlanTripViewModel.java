@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.type.Climb;
 import edu.neu.tiedin.types.ClimbingStyle;
@@ -19,7 +20,7 @@ public class PlanTripViewModel extends ViewModel {
     private final MutableLiveData<LocalDate> planDate;
     private final MutableLiveData<List<AreasByFilterQuery.Area>> planAreas;
     private final MutableLiveData<List<ClimbingStyle>> planClimbStyles; // TODO Default to user preferences...
-    private final MutableLiveData<List<Climb>> planObjectives;
+    private final MutableLiveData<List<AreaByUUIDQuery.Climb>> planObjectives;
     private final MutableLiveData<String> planDetails;
 
     public PlanTripViewModel() {
@@ -50,7 +51,7 @@ public class PlanTripViewModel extends ViewModel {
         return planClimbStyles;
     }
 
-    public MutableLiveData<List<Climb>> getPlanObjectives() {
+    public MutableLiveData<List<AreaByUUIDQuery.Climb>> getPlanObjectives() {
         return planObjectives;
     }
 
@@ -70,5 +71,13 @@ public class PlanTripViewModel extends ViewModel {
         planClimbStyles.getValue().clear();
         planClimbStyles.getValue().addAll(climbTypes);
         Log.d(TAG, "setPlanClimbStyles: " + climbTypes.toArray().toString());
+    }
+
+    public void addPlannedObjective(AreaByUUIDQuery.Climb selected) {
+        planObjectives.getValue().add(selected);
+    }
+
+    public void removePlannedObjective(AreaByUUIDQuery.Climb selected) {
+        planObjectives.getValue().remove(selected);
     }
 }

@@ -1,7 +1,6 @@
 package edu.neu.tiedin.ui.plantrip;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,32 +15,23 @@ import androidx.annotation.Nullable;
 import com.apollographql.apollo3.ApolloCall;
 import com.apollographql.apollo3.ApolloClient;
 import com.apollographql.apollo3.api.ApolloResponse;
-import com.apollographql.apollo3.api.Operation;
 import com.apollographql.apollo3.cache.normalized.NormalizedCache;
 import com.apollographql.apollo3.cache.normalized.api.FieldPolicyCacheResolver;
 import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
 import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
 import com.apollographql.apollo3.rx3.Rx3Apollo;
 
-import org.reactivestreams.Subscriber;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.AreasByFilterQuery;
 import edu.neu.tiedin.R;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableConcatArray;
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableConcatMap;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-import kotlinx.coroutines.flow.Flow;
 
-public class ObjectiveSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area> implements Filterable {
+public class ObjectiveSuggestFilter extends ArrayAdapter<AreaByUUIDQuery.Climb> implements Filterable {
 
     private final String TAG = "ObjectiveSuggestFilter";
 
@@ -85,30 +75,30 @@ public class ObjectiveSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area
                 }
 
                 // Query each area (crag) by UUID in order to collect all of their climbs for the search
-                List<ApolloCall<AreaByUUIDQuery.Data>> cragByUUIDQueries = areasToSearch.stream().map(
-                        area -> client.query(new AreaByUUIDQuery(area.uuid))).collect(Collectors.toList());
+                List<Flowable<ApolloResponse<AreaByUUIDQuery.Data>>> cragByUUIDQueries = areasToSearch.stream().map(
+                        area -> Rx3Apollo.flowable(client.query(new AreaByUUIDQuery(area.uuid)))).collect(Collectors.toList());
 
                 // Flow all requests in parallel
-                Flowable<ApolloCall<AreaByUUIDQuery.Data>> parallelRequest = new FlowableConcatArray<ApolloCall<AreaByUUIDQuery.Data>>(cragByUUIDQueries)
-                        .parallel()
-                        .runOn(Schedulers.io());
-
+//                Flowable<ApolloResponse<AreaByUUIDQuery.Data>> parallelRequest = new FlowableConcatArray<ApolloResponse<Operation.Data>>(cragByUUIDQueries);
+                Flowable<ApolloResponse<AreaByUUIDQuery.Data>> parallelRequest = cragByUUIDQueries.stream().reduce(
+                        Flowable.empty(),
+                        (accumFlowable, newElem) -> accumFlowable.concatWith(newElem));
 
                 // Always clear
                 tempClimbList.clear();
-                Rx3Apollo.flowable(parallelRequest).blockingSubscribe(genericResponse -> {
-                    ApolloResponse<AreaByUUIDQuery.Data> dataApolloResponse = (ApolloResponse<AreaByUUIDQuery.Data>) genericResponse;
-
-                    // Only try to update if there are actual results
-                    if (!dataApolloResponse.hasErrors() &&
-                            dataApolloResponse.data.area.climbs != null &&
-                            dataApolloResponse.data.area.climbs.size() > 0) {
-                        tempClimbList.addAll(dataApolloResponse.data.area.climbs);
-                    }
-
-                    results.values = tempClimbList;
-                    results.count = tempClimbList.size();
-                });
+//                Rx3Apollo.flowable(parallelRequest).blockingSubscribe(genericResponse -> {
+//                    ApolloResponse<AreaByUUIDQuery.Data> dataApolloResponse = (ApolloResponse<AreaByUUIDQuery.Data>) genericResponse;
+//
+//                    // Only try to update if there are actual results
+//                    if (!dataApolloResponse.hasErrors() &&
+//                            dataApolloResponse.data.area.climbs != null &&
+//                            dataApolloResponse.data.area.climbs.size() > 0) {
+//                        tempClimbList.addAll(dataApolloResponse.data.area.climbs);
+//                    }
+//
+//                    results.values = tempClimbList;
+//                    results.count = tempClimbList.size();
+//                });
 
                 return results;
             }
@@ -142,27 +132,25 @@ public class ObjectiveSuggestFilter extends ArrayAdapter<AreasByFilterQuery.Area
         if(listItem == null)
             listItem = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2,parent,false);
 
-        AreasByFilterQuery.Area currentArea = areasList.get(position);
+        AreaByUUIDQuery.Climb currentClimb = climbList.get(position);
 
         TextView name = (TextView) listItem.findViewById(android.R.id.text1);
         TextView subtext = (TextView) listItem.findViewById(android.R.id.text2);
-        name.setText(currentArea.areaName);
+        name.setText(currentClimb.name);
 
-        DecimalFormat df = new DecimalFormat("###.#####");
-        subtext.setText(df.format(currentArea.metadata.lat)
-                + ", " + df.format(currentArea.metadata.lng));
+        subtext.setText(currentClimb.yds);
 
         return listItem;
     }
 
     @Override
     public int getCount() {
-        return areasList.size();
+        return climbList.size();
     }
 
     @Override
-    public AreasByFilterQuery.Area getItem(int position) {
-        return areasList.get(position);
+    public AreaByUUIDQuery.Climb getItem(int position) {
+        return climbList.get(position);
     }
 
     @NonNull
