@@ -11,23 +11,34 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
-import edu.neu.tiedin.type.Climb;
+import edu.neu.tiedin.data.User;
+import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     private static final String TAG = "TripAdapter";
     private ArrayList<ClimbingTrip> trips;
     private Context context;
+    FirebaseFirestore firebaseFirestore;
 
-    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context) {
+    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore) {
         this.trips = trips;
         this.context = context;
+        this.firebaseFirestore = firebaseFirestore;
     }
 
     public void filterList(ArrayList<ClimbingTrip> filterList) {
@@ -45,7 +56,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull TripAdapter.ViewHolder holder, int position) {
         ClimbingTrip trip = trips.get(position);
-        holder.text.setText(trip.getOrganizerUserId());
+        holder.bind(trip);
     }
 
     @Override
@@ -89,11 +100,50 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView text;
+        TextView txtHostName, txtDate, txtAreas, txtStyles, txtDescription;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            text = itemView.findViewById(R.id.text);
+            this.txtHostName = itemView.findViewById(R.id.txtHostName);
+            this.txtDate = itemView.findViewById(R.id.txtDate);
+            this.txtAreas = itemView.findViewById(R.id.txtAreas);
+            this.txtStyles = itemView.findViewById(R.id.txtStyles);
+            this.txtDescription = itemView.findViewById(R.id.txtDescription);
+        }
+
+        public void bind(ClimbingTrip trip) {
+            // Temporarily set organizer ("host") username to their UUID, async change to actual name from profile
+            txtHostName.setText(trip.getOrganizerUserId());
+            firebaseFirestore.collection("users")
+                    .document(trip.getOrganizerUserId())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Log.e(TAG, "bind: " + "Failed to pull user from DB (UUID: " + trip.getOrganizerUserId() + ")");
+                        } else if (task.getResult() == null) {
+                            Log.e(TAG, "bind: " + "null result from DB (UUID: " + trip.getOrganizerUserId() + ")");
+                        } else if (task.getResult().toObject(User.class) == null) {
+                            Log.e(TAG, "bind: " + "null user from DB (UUID: " + trip.getOrganizerUserId() + ")");
+                        } else if (task.getResult().toObject(User.class).getName() == null) {
+                            Log.e(TAG, "bind: " + "null username from DB (UUID: " + trip.getOrganizerUserId() + ")");
+                        } else {
+                            txtHostName.setText(task.getResult().toObject(User.class).getName());
+                        }
+                    });
+
+            // Set date
+            txtDate.setText(LocalDate.ofEpochDay(trip.getEpochDate()).format(DateTimeFormatter.ofPattern("E MMM d")));
+
+            // Set Area names comma-separated
+            String joinedAreas = trip.getAreas().stream().map(composedArea -> composedArea.areaName).collect(Collectors.joining(","));
+            txtAreas.setText(joinedAreas);
+
+            // Set styles as comma-separated
+            String joinedStyles = trip.getStyles().stream().map(composedStyle -> composedStyle.toString()).collect(Collectors.joining(","));
+            txtStyles.setText(joinedStyles);
+
+            // Description is easy
+            txtDescription.setText(trip.getDetails());
         }
     }
 }

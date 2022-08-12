@@ -73,6 +73,14 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Configure trip pull from DB
+        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext(), firestoreDatabase);
+
+        // Configure Climb recyclerview
+        tripViewLayoutManager = new LinearLayoutManager(getContext());
+        binding.recyclerViewListTrips.setAdapter(tripAdapter);
+        binding.recyclerViewListTrips.setLayoutManager(tripViewLayoutManager);
+
         // Get current trips
         final CollectionReference colRef = firestoreDatabase.collection("trips");
         colRef.get().addOnCompleteListener(task -> {
@@ -118,14 +126,6 @@ public class HomeFragment extends Fragment {
                 Log.d(TAG, "Current data: null");
             }
         });
-
-        // Configure trip pull from DB
-        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext());
-
-        // Configure Climb recyclerview
-        tripViewLayoutManager = new LinearLayoutManager(getContext());
-        binding.recyclerViewListTrips.setAdapter(tripAdapter);
-        binding.recyclerViewListTrips.setLayoutManager(tripViewLayoutManager);
 
         return root;
     }
