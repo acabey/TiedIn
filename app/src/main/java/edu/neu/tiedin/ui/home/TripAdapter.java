@@ -141,7 +141,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
             txtDate.setText(LocalDate.ofEpochDay(trip.getEpochDate()).format(DateTimeFormatter.ofPattern("E MMM d")));
 
             // Set Area names comma-separated
-            String joinedAreas = trip.getAreas().stream().map(composedArea -> composedArea.areaName).collect(Collectors.joining(","));
+            String joinedAreas = trip.getAreas().stream().map(composedArea -> composedArea.areaName).collect(Collectors.joining(", "));
             txtAreas.setText(joinedAreas);
 
             // Set styles as comma-separated
@@ -149,7 +149,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                     .getStyles()
                     .stream()
                     .map(composedStyle -> WordUtils.capitalizeFully(composedStyle.toString()))
-                    .collect(Collectors.joining(","));
+                    .collect(Collectors.joining(", "));
             txtStyles.setText(joinedStyles);
 
             // Description is easy
