@@ -1,15 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="10dp">
+    app:layout_constrainedWidth="false"
+    app:cardCornerRadius="4dp"
+    android:layout_margin="8dp"
+    app:cardUseCompatPadding="true"
+    app:cardElevation="9dp"
+    android:id="@+id/messageCard">
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"/>
+        android:orientation="horizontal"
+        android:padding="10dp">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/txtHostName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgProfilePic"
+            app:layout_constraintTop_toTopOf="@+id/imgProfilePic"
+            tools:text="Chris" />
+
+        <TextView
+            android:id="@+id/txtDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgDate"
+            app:layout_constraintTop_toTopOf="@+id/imgDate"
+            tools:text="Fri 7/15" />
+
+        <TextView
+            android:id="@+id/txtAreas"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgArea"
+            app:layout_constraintTop_toBottomOf="@+id/txtDate"
+            tools:text="The Gunks" />
+
+        <TextView
+            android:id="@+id/txtStyles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/imgStyles"
+            app:layout_constraintTop_toBottomOf="@+id/txtAreas"
+            tools:text="Sport 5.8 - 5.9+" />
+
+        <ImageView
+            android:id="@+id/imgProfilePic"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:srcCompat="@drawable/ic_menu_camera" />
+
+        <ImageView
+            android:id="@+id/imgDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/txtHostName"
+            app:layout_constraintTop_toBottomOf="@+id/txtHostName"
+            app:srcCompat="@drawable/ic_baseline_access_time_24" />
+
+        <ImageView
+            android:id="@+id/imgArea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/txtHostName"
+            app:layout_constraintTop_toBottomOf="@+id/txtDate"
+            app:srcCompat="@drawable/ic_outline_terrain_24" />
+
+        <ImageView
+            android:id="@+id/imgStyles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@+id/txtHostName"
+            app:layout_constraintTop_toBottomOf="@+id/txtAreas"
+            app:srcCompat="@drawable/ic_drawable_carabiner" />
+
+        <TextView
+            android:id="@+id/txtDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            android:text="Looking for a partner to go out with on some rad adventure trad lines out in the Gunks. Probably looking at High E and a few more in that area."
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/imgProfilePic"
+            app:layout_constraintTop_toBottomOf="@+id/txtStyles"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

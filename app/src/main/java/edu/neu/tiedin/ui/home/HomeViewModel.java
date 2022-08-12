@@ -20,7 +20,4 @@ public class HomeViewModel extends ViewModel {
         return trips;
     }
 
-    public void addTrips(List<ClimbingTrip> newTrips) {
-        this.trips.getValue().addAll(newTrips);
-    }
 }
