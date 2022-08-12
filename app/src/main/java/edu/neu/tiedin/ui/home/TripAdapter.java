@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.apache.commons.text.WordUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -100,10 +103,13 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        CardView tripCard;
         TextView txtHostName, txtDate, txtAreas, txtStyles, txtDescription;
+        boolean expandedVisibility = false;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.tripCard = itemView.findViewById(R.id.tripCard);
             this.txtHostName = itemView.findViewById(R.id.txtHostName);
             this.txtDate = itemView.findViewById(R.id.txtDate);
             this.txtAreas = itemView.findViewById(R.id.txtAreas);
@@ -139,11 +145,31 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
             txtAreas.setText(joinedAreas);
 
             // Set styles as comma-separated
-            String joinedStyles = trip.getStyles().stream().map(composedStyle -> composedStyle.toString()).collect(Collectors.joining(","));
+            String joinedStyles = trip
+                    .getStyles()
+                    .stream()
+                    .map(composedStyle -> WordUtils.capitalizeFully(composedStyle.toString()))
+                    .collect(Collectors.joining(","));
             txtStyles.setText(joinedStyles);
 
             // Description is easy
             txtDescription.setText(trip.getDetails());
+
+            // Clicking on the card toggles "expanded view" to include the full areas list, description, etc.
+            tripCard.setOnClickListener(v -> toggleExpanded());
+        }
+
+        void toggleExpanded() {
+            if (expandedVisibility) {
+                txtDescription.setVisibility(View.GONE);
+                txtAreas.setMaxLines(10);
+                txtStyles.setMaxLines(10);
+            } else {
+                txtDescription.setVisibility(View.VISIBLE);
+                txtAreas.setMaxLines(1);
+                txtStyles.setMaxLines(1);
+            }
+            expandedVisibility = !expandedVisibility;
         }
     }
 }
