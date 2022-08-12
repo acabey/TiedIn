@@ -55,13 +55,21 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     public void addTrips(Collection<ClimbingTrip> newTrips) {
         int priorSize = this.trips.size();
-        this.trips.addAll(newTrips);
-        notifyItemRangeInserted(priorSize, newTrips.size());
+        int added = 0;
+        for (ClimbingTrip newTrip: newTrips) {
+            if (!trips.contains(newTrip)) {
+                trips.add(newTrip);
+                added++;
+            }
+        }
+        notifyItemRangeInserted(priorSize, added);
     }
 
     public void addTrip(ClimbingTrip newTrip) {
-        trips.add(newTrip);
-        notifyItemInserted(trips.size());
+        if (!trips.contains(newTrip)) {
+            trips.add(newTrip);
+            notifyItemInserted(trips.size());
+        }
     }
 
     public void removeTrip(ClimbingTrip newTrip) {
@@ -72,8 +80,11 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
     }
 
     public void modifyTrip(ClimbingTrip modifiedTrip) {
-        // TODO
-        Log.d(TAG, "modifyTrip: Modification of trips is not implemented");
+        if (trips.contains(modifiedTrip)) {
+            int indexModified = trips.indexOf(modifiedTrip);
+            trips.set(indexModified, modifiedTrip);
+            notifyItemChanged(indexModified);
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

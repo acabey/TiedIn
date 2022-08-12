@@ -1,14 +1,17 @@
 package edu.neu.tiedin.data;
 
+import androidx.annotation.NonNull;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import edu.neu.tiedin.types.ClimbingStyle;
 import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class ClimbingTrip {
+    @NonNull
+    private String _id;
     private String organizerUserId;
     private List<String> participantUserIds;
     private Long epochDate;
@@ -16,15 +19,27 @@ public class ClimbingTrip {
     private List<ClimbingStyle> styles;
     private String details;
 
-    public ClimbingTrip() {}
+    public ClimbingTrip() {
+        _id = UUID.randomUUID().toString();
+    }
 
     public ClimbingTrip(String organizerUserId, List<String> participantUserIds, Long epochDate, List<ComposedArea> areas, List<ClimbingStyle> styles, String details) {
+        this();
         this.organizerUserId = organizerUserId;
         this.participantUserIds = participantUserIds;
         this.epochDate = epochDate;
         this.areas = areas;
         this.styles = styles;
         this.details = details;
+    }
+
+    @NonNull
+    public String get_id() {
+        return _id;
+    }
+
+    public void set_id(@NonNull String _id) {
+        this._id = _id;
     }
 
     public String getOrganizerUserId() {
@@ -80,11 +95,11 @@ public class ClimbingTrip {
         if (this == o) return true;
         if (!(o instanceof ClimbingTrip)) return false;
         ClimbingTrip that = (ClimbingTrip) o;
-        return getOrganizerUserId().equals(that.getOrganizerUserId()) && getParticipantUserIds().equals(that.getParticipantUserIds()) && getEpochDate().equals(that.getEpochDate()) && getAreas().equals(that.getAreas()) && getStyles().equals(that.getStyles()) && getDetails().equals(that.getDetails());
+        return _id.equals(that._id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getOrganizerUserId(), getParticipantUserIds(), getEpochDate(), getAreas(), getStyles(), getDetails());
+        return Objects.hash(_id);
     }
 }
