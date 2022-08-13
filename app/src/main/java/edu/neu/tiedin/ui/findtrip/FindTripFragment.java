@@ -57,7 +57,6 @@ public class FindTripFragment extends Fragment {
         sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
         assert (userId != null); // MainActivity should force login
-
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,

@@ -42,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
     private String userId;
-    private User activeUser;
+
+    private final SharedPreferences.OnSharedPreferenceChangeListener userChangeListener = (sharedPreferences, key) -> {
+        Log.i(TAG, "MainActivity: sharedPreferenceChangeListener triggered with key: " + key);
+        if (key.equals(USER_KEY)) {
+            Log.d(TAG, "MainActivity: user change detected");
+        }
+    };
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
@@ -74,31 +80,8 @@ public class MainActivity extends AppCompatActivity {
         sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
 
-        ApolloClient.Builder builder = new ApolloClient.Builder()
-                .serverUrl(getString(R.string.OPENBETA_ENDPOINT_ADDRESS));
-
-
-        // Optionally, set a normalized cache
-        NormalizedCache.configureApolloClientBuilder(
-                builder,
-                new MemoryCacheFactory(10 * 1024 * 1024, -1),
-                TypePolicyCacheKeyGenerator.INSTANCE,
-                FieldPolicyCacheResolver.INSTANCE,
-                false
-        );
-
-        ApolloClient client = builder.build();
-
-        ApolloCall<CragsNearQuery.Data> cragsNearBoston = client.query(new CragsNearQuery("Example",
-                new Point(new Optional.Present<>(42.24738820721922), new Optional.Present<>(-71.32416137320287)),
-                0,
-                1600*50,
-                true));
-
-        Single<ApolloResponse<CragsNearQuery.Data>> queryResponse = Rx3Apollo.single(cragsNearBoston);
-
-        queryResponse.subscribe(dataApolloResponse -> Log.d(TAG, "accept: size " + dataApolloResponse.data.cragsNear.size()));
-
+        // Listen for changes in logged in user
+        sharedpreferences.registerOnSharedPreferenceChangeListener(userChangeListener);
     }
 
     @Override
@@ -113,15 +96,6 @@ public class MainActivity extends AppCompatActivity {
         forceLogin();
     }
 
-    private void forceLogin() {
-        // If there is an existing session, transition to Main
-        if (userId == null) {
-            Log.d(TAG, "forceLogin: email not found, forcing login screen");
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(i);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
@@ -133,4 +107,21 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sharedpreferences.unregisterOnSharedPreferenceChangeListener(userChangeListener);
+    }
+
+    private void forceLogin() {
+        // If there is an existing session, transition to Main
+        if (userId == null) {
+            Log.d(TAG, "forceLogin: email not found, forcing login screen");
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(i);
+            finish();
+        }
+    }
+
 }

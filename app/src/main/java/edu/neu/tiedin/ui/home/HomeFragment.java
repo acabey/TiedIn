@@ -1,6 +1,7 @@
 package edu.neu.tiedin.ui.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,8 @@ import com.google.firebase.firestore.Query;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import edu.neu.tiedin.LoginActivity;
+import edu.neu.tiedin.MainActivity;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.databinding.FragmentHomeBinding;
@@ -56,7 +59,7 @@ public class HomeFragment extends Fragment {
         // Get login preferences
         sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
-        assert (userId != null); // MainActivity should force login
+//        assert (userId != null); // MainActivity should force login
 
     }
 
@@ -129,5 +132,20 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+//        forceLogin();
+    }
+
+    private void forceLogin() {
+        // If there is an existing session, transition to Main
+        if (userId == null) {
+            Log.d(TAG, "forceLogin: email not found, forcing login screen");
+            Intent i = new Intent(getContext(), LoginActivity.class);
+            startActivity(i);
+        }
     }
 }
