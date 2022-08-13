@@ -161,13 +161,15 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
         void toggleExpanded() {
             if (expandedVisibility) {
+                // Toggle to off
                 txtDescription.setVisibility(View.GONE);
-                txtAreas.setMaxLines(10);
-                txtStyles.setMaxLines(10);
-            } else {
-                txtDescription.setVisibility(View.VISIBLE);
                 txtAreas.setMaxLines(1);
                 txtStyles.setMaxLines(1);
+            } else {
+                // Toggle to on
+                txtDescription.setVisibility(View.VISIBLE);
+                txtAreas.setMaxLines(10);
+                txtStyles.setMaxLines(10);
             }
             expandedVisibility = !expandedVisibility;
         }

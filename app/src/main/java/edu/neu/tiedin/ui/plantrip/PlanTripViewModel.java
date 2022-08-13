@@ -24,15 +24,12 @@ public class PlanTripViewModel extends ViewModel {
     private final MutableLiveData<String> planDetails;
 
     public PlanTripViewModel() {
-        planDate = new MutableLiveData<>();
+        // Default plan date to today
+        planDate = new MutableLiveData<>(LocalDate.now());
         planAreas = new MutableLiveData<>(new ArrayList<>());
         planClimbStyles = new MutableLiveData<>(new ArrayList<>());
         planObjectives = new MutableLiveData<>(new ArrayList<>());
-        planDetails = new MutableLiveData<>();
-
-        // Default plan date to today
-        LocalDate today = LocalDate.now();
-        planDate.setValue(today);
+        planDetails = new MutableLiveData<>("");
     }
 
     public MutableLiveData<LocalDate> getPlanDate() {
@@ -57,6 +54,10 @@ public class PlanTripViewModel extends ViewModel {
 
     public MutableLiveData<String> getPlanDetails() {
         return planDetails;
+    }
+
+    public void setPlanDetails(String val) {
+        planDetails.setValue(val);
     }
 
     public void addPlannedArea(AreasByFilterQuery.Area area) {

@@ -71,6 +71,8 @@ public class PlanTripFragment extends Fragment {
                 new ViewModelProvider(this).get(PlanTripViewModel.class);
 
         binding = FragmentPlanTripBinding.inflate(inflater, container, false);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding.setPlanTripViewModel(planTripViewModel);
         View root = binding.getRoot();
 
         // Bind UI to ViewModel
