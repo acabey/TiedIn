@@ -16,10 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.apache.commons.text.WordUtils;
@@ -28,10 +25,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.data.User;

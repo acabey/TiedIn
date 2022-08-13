@@ -1,19 +1,21 @@
 package edu.neu.tiedin.ui.findtrip;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
+
+import edu.neu.tiedin.data.ClimbingTrip;
+
 public class FindTripViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
+    private final MutableLiveData<ArrayList<ClimbingTrip>> trips;
 
     public FindTripViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is gallery fragment");
+        trips = new MutableLiveData<>(new ArrayList<>());
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public MutableLiveData<ArrayList<ClimbingTrip>> getTrips() {
+        return trips;
     }
 }
