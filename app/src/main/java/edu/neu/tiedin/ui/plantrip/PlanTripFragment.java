@@ -195,8 +195,10 @@ public class PlanTripFragment extends Fragment {
                 return;
             }
 
-            Task<DocumentReference> dbPostMessage = firestoreDatabase.collection("trips").add(trip);
-            dbPostMessage.addOnCompleteListener((OnCompleteListener<DocumentReference>) completedPostTrip -> {
+            Task<Void> dbPostMessage = firestoreDatabase.collection("trips")
+                    .document(trip.get_id())
+                    .set(trip);
+            dbPostMessage.addOnCompleteListener((OnCompleteListener<Void>) completedPostTrip -> {
                 if(completedPostTrip.isSuccessful()){
                     Toast.makeText(getContext(),"Posted new trip: ",Toast.LENGTH_SHORT).show();
                     switchFragments();

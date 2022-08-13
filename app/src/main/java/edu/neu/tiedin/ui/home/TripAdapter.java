@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -27,8 +28,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import edu.neu.tiedin.AreaByUUIDQuery;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.data.User;
@@ -176,8 +179,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                 popup.setOnMenuItemClickListener(item -> {
                     switch (item.getItemId()) {
                         case (R.id.tripItemDelete):
-                            removeTrip(trip);
-                            Log.d(TAG, "bind: Trip deleted");
+                            deleteTrip(trip);
                             return true;
                         default:
                             Log.d(TAG, "bind: Could not find menu item clicked");
@@ -201,6 +203,22 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                 txtStyles.setMaxLines(10);
             }
             expandedVisibility = !expandedVisibility;
+        }
+
+        void deleteTrip(ClimbingTrip trip) {
+            DocumentReference refToDelete = firebaseFirestore.collection("trips").document(trip.get_id());
+            if (refToDelete != null) {
+                refToDelete.delete().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        removeTrip(trip);
+                        Log.i(TAG, "deleteTrip: successfully deleted trip UUID " + trip.get_id());
+                    } else {
+                        Log.e(TAG, "deleteTrip: found, but could not delete trip UUID " + trip.get_id());
+                    }
+                });
+            } else {
+                Log.d(TAG, "deleteTrip: tried to delete trip UUID " + trip.get_id() + ", but could not find in DB");
+            }
         }
     }
 }
