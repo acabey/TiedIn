@@ -81,25 +81,31 @@ public class LoginActivity extends AppCompatActivity {
             String attemptedEmail = binding.txtEmail.getText().toString();
             String attemptedPassword = binding.txtPassword.getText().toString();
 
-
             firebaseFirestore.collection("users")
                     .whereEqualTo("email", attemptedEmail)
                     .get()
                     .addOnCompleteListener(task -> {
                         if (!task.isSuccessful()) {
                             Log.e(TAG, "bind: " + "Failed to pull email from DB (email: " + attemptedEmail + ")");
+                            Toast.makeText(LoginActivity.this, "Failed to connect to database", Toast.LENGTH_SHORT).show();
                         } else if (task.getResult() == null) {
                             Log.e(TAG, "bind: " + "null result from DB (username: " + attemptedEmail + ")");
+                            Toast.makeText(LoginActivity.this, "Null result from database", Toast.LENGTH_SHORT).show();
                         } else if (task.getResult().getDocuments() == null) {
                             Log.e(TAG, "bind: " + "null documents from DB (username: " + attemptedEmail + ")");
+                            Toast.makeText(LoginActivity.this, "Null documents result from database", Toast.LENGTH_SHORT).show();
                         } else if (task.getResult().getDocuments().size() == 0) {
                             Log.e(TAG, "bind: " + "no user document found in DB (username: " + attemptedEmail + ")");
+                            binding.txtEmail.setError("Invalid username");
                         } else if (task.getResult().getDocuments().size() > 1) {
                             Log.e(TAG, "bind: " + "too many user document found in DB (username: " + attemptedEmail + ")");
+                            binding.txtEmail.setError("Invalid username");
                         } else if (task.getResult().getDocuments().get(0).toObject(User.class) == null) {
                             Log.e(TAG, "bind: " + "null user object found in DB (username: " + attemptedEmail + ")");
+                            binding.txtEmail.setError("Invalid username");
                         } else if (!task.getResult().getDocuments().get(0).toObject(User.class).checkPassword(attemptedPassword)) {
                             Log.i(TAG, "bind: " + "incorrect password (username: " + attemptedEmail + ")");
+                            binding.txtPassword.setError("Incorrect password");
                         } else {
                             Log.i(TAG, "bind: " + "valid login (username: " + attemptedEmail + ")");
                             User loggedInUser = task.getResult().getDocuments().get(0).toObject(User.class);
