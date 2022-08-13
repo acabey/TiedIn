@@ -52,7 +52,7 @@ public class SettingsFragment extends Fragment {
             Log.d(TAG, "onCreateView: Clearing SharedPreferences to force logout");
             sharedpreferences.edit().clear().apply();
             Intent i = new Intent(getContext(), LoginActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         });
 

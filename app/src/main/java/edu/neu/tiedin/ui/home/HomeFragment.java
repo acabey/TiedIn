@@ -137,15 +137,5 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-//        forceLogin();
-    }
-
-    private void forceLogin() {
-        // If there is an existing session, transition to Main
-        if (userId == null) {
-            Log.d(TAG, "forceLogin: email not found, forcing login screen");
-            Intent i = new Intent(getContext(), LoginActivity.class);
-            startActivity(i);
-        }
     }
 }

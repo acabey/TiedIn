@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         if (userId == null) {
             Log.d(TAG, "forceLogin: email not found, forcing login screen");
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
         }

@@ -65,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
         if (userId != null) {
             Log.d(TAG, "onStart: existing session found, transitioning to main");
             Intent i = new Intent(LoginActivity.this, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
         }
