@@ -4,8 +4,12 @@ package edu.neu.tiedin.ui.home;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,13 +27,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.data.User;
-import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
@@ -37,11 +39,13 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
     private ArrayList<ClimbingTrip> trips;
     private Context context;
     FirebaseFirestore firebaseFirestore;
+    String currentUserId;
 
-    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore) {
+    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore, String currentUserId) {
         this.trips = trips;
         this.context = context;
         this.firebaseFirestore = firebaseFirestore;
+        this.currentUserId = currentUserId;
     }
 
     public void filterList(ArrayList<ClimbingTrip> filterList) {
@@ -86,10 +90,11 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
         }
     }
 
-    public void removeTrip(ClimbingTrip newTrip) {
-        if (trips.contains(newTrip)) {
-            trips.remove(newTrip);
-            notifyItemRemoved(trips.size());
+    public void removeTrip(ClimbingTrip tripToRemove) {
+        int previousIndex = trips.indexOf(tripToRemove);
+        if (previousIndex > -1) {
+            trips.remove(tripToRemove);
+            notifyItemRemoved(previousIndex);
         }
     }
 
@@ -105,6 +110,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
         CardView tripCard;
         TextView txtHostName, txtDate, txtAreas, txtStyles, txtDescription;
+        ImageButton btnPopupMenu;
         boolean expandedVisibility = false;
 
         public ViewHolder(@NonNull View itemView) {
@@ -115,6 +121,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
             this.txtAreas = itemView.findViewById(R.id.txtAreas);
             this.txtStyles = itemView.findViewById(R.id.txtStyles);
             this.txtDescription = itemView.findViewById(R.id.txtDescription);
+            this.btnPopupMenu = itemView.findViewById(R.id.btnPopupmenu);
         }
 
         public void bind(ClimbingTrip trip) {
@@ -157,6 +164,28 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
             // Clicking on the card toggles "expanded view" to include the full areas list, description, etc.
             tripCard.setOnClickListener(v -> toggleExpanded());
+
+            // Show popup menu if trip is owned by current user
+            btnPopupMenu.setVisibility(currentUserId.equals(trip.getOrganizerUserId()) ? View.VISIBLE : View.GONE);
+
+            // Popup menu allows for deletion
+            btnPopupMenu.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(context, v);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.trip_item_manage_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case (R.id.tripItemDelete):
+                            removeTrip(trip);
+                            Log.d(TAG, "bind: Trip deleted");
+                            return true;
+                        default:
+                            Log.d(TAG, "bind: Could not find menu item clicked");
+                            return false;
+                    }
+                });
+                popup.show();
+            });
         }
 
         void toggleExpanded() {
