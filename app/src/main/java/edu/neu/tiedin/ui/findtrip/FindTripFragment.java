@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.databinding.FragmentFindTripBinding;
-import edu.neu.tiedin.databinding.FragmentHomeBinding;
 import edu.neu.tiedin.ui.home.HomeViewModel;
 import edu.neu.tiedin.ui.home.TripAdapter;
 
@@ -40,7 +39,7 @@ public class FindTripFragment extends Fragment {
     private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
     private String userId;
-    private FragmentHomeBinding binding;
+    private FragmentFindTripBinding binding;
 
     private RecyclerView.LayoutManager tripViewLayoutManager;
     private TripAdapter tripAdapter;
@@ -66,7 +65,7 @@ public class FindTripFragment extends Fragment {
         HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentFindTripBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         // Configure trip pull from DB
