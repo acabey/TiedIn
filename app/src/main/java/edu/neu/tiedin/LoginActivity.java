@@ -8,9 +8,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import edu.neu.tiedin.data.User;
+import edu.neu.tiedin.databinding.ActivityLoginBinding;
+import edu.neu.tiedin.databinding.FragmentHomeBinding;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -22,6 +29,10 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences sharedpreferences;
     String userId;
 
+    FirebaseFirestore firebaseFirestore;
+
+    ActivityLoginBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,30 +41,19 @@ public class LoginActivity extends AppCompatActivity {
         SHARED_PREFS = getString(R.string.sessionLoginPrefsKey);
         USER_KEY = getString(R.string.sessionUserIdKey);
 
-        // Initializing EditTexts and our Button
-        EditText emailEdt = findViewById(R.id.username);
-        EditText passwordEdt = findViewById(R.id.password);
-        Button loginBtn = findViewById(R.id.login);
+        // Connect with firebase
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        // Initializing binding
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // Get login preferences (if they exist)
         sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
 
-        loginBtn.setOnClickListener(v -> {
-            if (TextUtils.isEmpty(emailEdt.getText().toString()) && TextUtils.isEmpty(passwordEdt.getText().toString())) {
-                // Email and password cannot be empty
-                Toast.makeText(LoginActivity.this, "Please Enter Email and Password", Toast.LENGTH_SHORT).show();
-            } else {
-                // Mock login, save email as the user key
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putString(USER_KEY, emailEdt.getText().toString());
-                editor.apply();
-
-                // Transition to the main activity
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(i);
-                finish();
-            }
+        binding.btnLogin.setOnClickListener(v -> {
+            attemptLogin();
         });
     }
 
@@ -64,10 +64,55 @@ public class LoginActivity extends AppCompatActivity {
         // If there is an existing session, transition to Main
         if (userId != null) {
             Log.d(TAG, "onStart: existing session found, transitioning to main");
-            Intent i = new Intent(LoginActivity.this, MainActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
+            transitionToMain();
         }
+    }
+
+    private void attemptLogin() {
+        if (TextUtils.isEmpty(binding.txtEmail.getText().toString()) && TextUtils.isEmpty(binding.txtPassword.getText().toString())) {
+            // Email and password cannot be empty
+            Toast.makeText(LoginActivity.this, "Please Enter Email and Password", Toast.LENGTH_SHORT).show();
+        } else {
+            String attemptedEmail = binding.txtEmail.getText().toString();
+            String attemptedPassword = binding.txtPassword.getText().toString();
+
+            firebaseFirestore.collection("users")
+                    .whereEqualTo("email", attemptedEmail)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Log.e(TAG, "bind: " + "Failed to pull email from DB (email: " + attemptedEmail + ")");
+                        } else if (task.getResult() == null) {
+                            Log.e(TAG, "bind: " + "null result from DB (username: " + attemptedEmail + ")");
+                        } else if (task.getResult().getDocuments() == null) {
+                            Log.e(TAG, "bind: " + "null documents from DB (username: " + attemptedEmail + ")");
+                        } else if (task.getResult().getDocuments().size() == 0) {
+                            Log.e(TAG, "bind: " + "no user document found in DB (username: " + attemptedEmail + ")");
+                        } else if (task.getResult().getDocuments().size() > 1) {
+                            Log.e(TAG, "bind: " + "too many user document found in DB (username: " + attemptedEmail + ")");
+                        } else if (task.getResult().getDocuments().get(0).toObject(User.class) == null) {
+                            Log.e(TAG, "bind: " + "null user object found in DB (username: " + attemptedEmail + ")");
+                        } else if (!task.getResult().getDocuments().get(0).toObject(User.class).getPassword().equals(attemptedPassword)) {
+                            Log.i(TAG, "bind: " + "incorrect password (username: " + attemptedEmail + ")");
+                        } else {
+                            Log.i(TAG, "bind: " + "valid login (username: " + attemptedEmail + ")");
+                            User loggedInUser = task.getResult().getDocuments().get(0).toObject(User.class);
+                            // Mock login, save email as the user key
+                            SharedPreferences.Editor editor = sharedpreferences.edit();
+                            editor.putString(USER_KEY, loggedInUser.get_id());
+                            editor.apply();
+
+                            // Transition to the main activity
+                            transitionToMain();
+                        }
+                    });
+        }
+    }
+
+    private void transitionToMain() {
+        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        finish();
     }
 }

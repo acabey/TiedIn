@@ -1,54 +1,61 @@
 package edu.neu.tiedin.data;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import edu.neu.tiedin.types.ClimberProfile;
 
 public class User {
 
     private String _id;
-    private java.lang.String name;
-    private java.lang.String email;
-    private java.lang.String phoneNumber;
+    private String name;
+    private String email;
+    private String password;
+    private String phoneNumber;
     private ClimberProfile profile;
 
-    public User(java.lang.String _id, java.lang.String name, java.lang.String email, java.lang.String phoneNumber, ClimberProfile profile) {
-        this._id = _id;
+    public User() {
+        this._id = UUID.randomUUID().toString();
+    }
+
+    public User(String name, String email, String password, String phoneNumber, ClimberProfile profile) {
+        this();
         this.name = name;
         this.email = email;
+        this.password = password;
         this.phoneNumber = phoneNumber;
         this.profile = profile;
     }
 
-    public java.lang.String get_id() {
+    public String get_id() {
         return _id;
     }
 
-    public void set_id(java.lang.String _id) {
+    public void set_id(String _id) {
         this._id = _id;
     }
 
-    public java.lang.String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(java.lang.String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public java.lang.String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(java.lang.String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public java.lang.String getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(java.lang.String phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
@@ -58,6 +65,14 @@ public class User {
 
     public void setProfile(ClimberProfile profile) {
         this.profile = profile;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

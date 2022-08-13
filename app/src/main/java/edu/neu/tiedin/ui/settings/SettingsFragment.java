@@ -54,6 +54,7 @@ public class SettingsFragment extends Fragment {
             Intent i = new Intent(getContext(), LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+            getActivity().finish();
         });
 
         return root;

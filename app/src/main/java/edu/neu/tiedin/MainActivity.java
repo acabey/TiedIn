@@ -7,17 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 
-import com.apollographql.apollo3.ApolloCall;
-import com.apollographql.apollo3.ApolloClient;
-import com.apollographql.apollo3.api.ApolloResponse;
-import com.apollographql.apollo3.api.Optional;
-import com.apollographql.apollo3.cache.normalized.NormalizedCache;
-import com.apollographql.apollo3.cache.normalized.api.FieldPolicyCacheResolver;
-import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory;
-import com.apollographql.apollo3.cache.normalized.api.TypePolicyCacheKeyGenerator;
-import com.apollographql.apollo3.rx3.Rx3Apollo;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.navigation.NavController;
@@ -27,10 +17,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.ActivityMainBinding;
-import edu.neu.tiedin.type.Point;
-import io.reactivex.rxjava3.core.Single;
 
 public class MainActivity extends AppCompatActivity {
 
