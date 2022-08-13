@@ -1,5 +1,9 @@
 package edu.neu.tiedin.data;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,7 +26,7 @@ public class User {
         this();
         this.name = name;
         this.email = email;
-        this.password = password;
+        this.password = generateEncodedPasswordHash(password);
         this.phoneNumber = phoneNumber;
         this.profile = profile;
     }
@@ -72,7 +76,11 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = generateEncodedPasswordHash(password);
+    }
+
+    public boolean checkPassword(String password) {
+        return this.password.equals(generateEncodedPasswordHash(password));
     }
 
     @Override
@@ -86,5 +94,16 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(get_id());
+    }
+
+    private static String generateEncodedPasswordHash(String passwordToHash) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-512");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] hashedPassword = md.digest(passwordToHash.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(hashedPassword);
     }
 }

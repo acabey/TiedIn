@@ -15,6 +15,11 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.ActivityLoginBinding;
 import edu.neu.tiedin.databinding.FragmentHomeBinding;
@@ -76,6 +81,7 @@ public class LoginActivity extends AppCompatActivity {
             String attemptedEmail = binding.txtEmail.getText().toString();
             String attemptedPassword = binding.txtPassword.getText().toString();
 
+
             firebaseFirestore.collection("users")
                     .whereEqualTo("email", attemptedEmail)
                     .get()
@@ -92,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.e(TAG, "bind: " + "too many user document found in DB (username: " + attemptedEmail + ")");
                         } else if (task.getResult().getDocuments().get(0).toObject(User.class) == null) {
                             Log.e(TAG, "bind: " + "null user object found in DB (username: " + attemptedEmail + ")");
-                        } else if (!task.getResult().getDocuments().get(0).toObject(User.class).getPassword().equals(attemptedPassword)) {
+                        } else if (!task.getResult().getDocuments().get(0).toObject(User.class).checkPassword(attemptedPassword)) {
                             Log.i(TAG, "bind: " + "incorrect password (username: " + attemptedEmail + ")");
                         } else {
                             Log.i(TAG, "bind: " + "valid login (username: " + attemptedEmail + ")");
