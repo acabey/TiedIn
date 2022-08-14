@@ -6,10 +6,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -17,6 +23,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -69,6 +76,26 @@ public class MainActivity extends AppCompatActivity {
 
         // Listen for changes in logged in user
         sharedpreferences.registerOnSharedPreferenceChangeListener(userChangeListener);
+
+        // Set header with User information
+        // Connect with firebase
+        firestoreDatabase = FirebaseFirestore.getInstance();
+        firestoreDatabase.collection("users")
+                .document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        User currentUser = task.getResult().toObject(User.class);
+                        View header = binding.navView.getHeaderView(0);
+                        TextView headerName = (TextView) header.findViewById(R.id.header_name);
+                        TextView headerEmail = (TextView) header.findViewById(R.id.header_email);
+
+                        headerName.setText(currentUser.getName());
+                        headerEmail.setText(currentUser.getEmail());
+                    } else {
+                        Log.e(TAG, "onCreate: failed to get user from DB");
+                    }
+        });
     }
 
     @Override
