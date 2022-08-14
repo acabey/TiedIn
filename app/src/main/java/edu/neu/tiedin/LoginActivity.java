@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
             binding.loading.setVisibility(View.VISIBLE);
 
             String attemptedEmail = binding.txtEmail.getText().toString();
-            String attemptedPassword = binding.txtPassword.getText().toString();
+            String attemptedPassword = User.generateEncodedPasswordHash(binding.txtPassword.getText().toString());
 
             firebaseFirestore.collection("users")
                     .whereEqualTo("email", attemptedEmail)

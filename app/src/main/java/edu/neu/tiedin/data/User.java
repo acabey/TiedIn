@@ -96,7 +96,7 @@ public class User {
         return Objects.hash(get_id());
     }
 
-    private static String generateEncodedPasswordHash(String passwordToHash) {
+    public static String generateEncodedPasswordHash(String passwordToHash) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-512");
