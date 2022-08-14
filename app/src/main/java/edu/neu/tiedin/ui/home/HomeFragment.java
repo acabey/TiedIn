@@ -3,6 +3,7 @@ package edu.neu.tiedin.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -72,7 +74,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         // Configure trip pull from DB
-        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId);
+        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId, new MutableLiveData<Location>());
 
         // Configure Climb recyclerview
         tripViewLayoutManager = new LinearLayoutManager(getContext());

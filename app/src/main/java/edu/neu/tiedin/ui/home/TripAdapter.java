@@ -1,21 +1,35 @@
 package edu.neu.tiedin.ui.home;
 
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.common.base.Converter;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -25,25 +39,30 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.data.User;
+import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     private static final String TAG = "TripAdapter";
     private ArrayList<ClimbingTrip> trips;
     private Context context;
-    FirebaseFirestore firebaseFirestore;
-    String currentUserId;
+    private FirebaseFirestore firebaseFirestore;
+    private String currentUserId;
+    private MutableLiveData<Location> locationData;
 
-    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore, String currentUserId) {
+    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore, String currentUserId, MutableLiveData<Location> locationData) {
         this.trips = trips;
         this.context = context;
         this.firebaseFirestore = firebaseFirestore;
         this.currentUserId = currentUserId;
+        this.locationData = locationData;
     }
 
     public void filterList(ArrayList<ClimbingTrip> filterList) {
@@ -106,9 +125,11 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        ClimbingTrip viewTrip;
         CardView tripCard;
         TextView txtHostName, txtDate, txtAreas, txtStyles, txtDescription;
         ImageButton btnPopupMenu;
+
         boolean expandedVisibility = false;
 
         public ViewHolder(@NonNull View itemView) {
@@ -123,6 +144,8 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
         }
 
         public void bind(ClimbingTrip trip) {
+            this.viewTrip = trip;
+
             // Temporarily set organizer ("host") username to their UUID, async change to actual name from profile
             txtHostName.setText(trip.getOrganizerUserId());
             firebaseFirestore.collection("users")
@@ -196,6 +219,32 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                 txtDescription.setVisibility(View.VISIBLE);
                 txtAreas.setMaxLines(10);
                 txtStyles.setMaxLines(10);
+
+                // Show distance to each crag, if location is available
+                if (locationData.getValue() != null) {
+                    // Set Area names comma-separated
+                    Function<ComposedArea, String> addAreaDistance = (ComposedArea composedArea) -> {
+                        if (composedArea.metadata != null && composedArea.metadata.lng != null && composedArea.metadata.lat != null) {
+                            Location areaLocation = new Location("");
+                            areaLocation.setLatitude(composedArea.metadata.lat);
+                            areaLocation.setLongitude(composedArea.metadata.lng);
+                            float distanceMeters = locationData.getValue().distanceTo(areaLocation);
+                            String distanceMiles = String.valueOf(Math.round(distanceMeters / 1600));
+
+                            return composedArea.areaName + " (" + distanceMiles + "mi away)";
+                        } else {
+                            return composedArea.areaName;
+                        }
+                    };
+                    String joinedAreas = viewTrip
+                            .getAreas()
+                            .stream()
+                            .map(composedArea -> addAreaDistance.apply(composedArea))
+                            .collect(Collectors.joining(", "));
+                    txtAreas.setText(joinedAreas);
+                } else {
+                    Log.d(TAG, "toggleExpanded: location value is null");
+                }
             }
             expandedVisibility = !expandedVisibility;
         }
