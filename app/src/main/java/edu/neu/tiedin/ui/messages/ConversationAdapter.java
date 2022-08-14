@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,13 +32,16 @@ class ConversationAdapter extends RecyclerView.Adapter {
     private final Context context;
     private final String currentUserId;
     private FirebaseFirestore firebaseFirestore;
+    private Fragment parentFragment;
 
     public class ConversationViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView txtParticipants;
+        private CardView cardView;
+        private TextView txtParticipants;
 
         public ConversationViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.cardView = (CardView) itemView;
             this.txtParticipants = (TextView) itemView.findViewById(R.id.txtParticipants);
         }
 
@@ -75,14 +81,25 @@ class ConversationAdapter extends RecyclerView.Adapter {
                             Log.e(TAG, "bindThisData: failed to replace participant IDs with names");
                         }
                     });
+
+            // Bind CardView to open Conversation Fragment
+            cardView.setOnClickListener(v -> {
+                FragmentTransaction ft = parentFragment.getParentFragmentManager().beginTransaction();
+
+                ft.replace(R.id.nav_messages, ConversationFragment.newInstance(conversationToBind.get_id()), null);
+                ft.addToBackStack(ConversationFragment.class.getName());
+                ft.commit();
+            });
+
         }
     }
 
-    public ConversationAdapter(List<Conversation> conversations, Context context, String currentUserId, FirebaseFirestore firebaseFirestore) {
+    public ConversationAdapter(List<Conversation> conversations, Context context, String currentUserId, FirebaseFirestore firebaseFirestore, Fragment parentFragment) {
         this.conversations = conversations;
         this.context = context;
         this.currentUserId = currentUserId;
         this.firebaseFirestore = firebaseFirestore;
+        this.parentFragment = parentFragment;
     }
 
     @NonNull

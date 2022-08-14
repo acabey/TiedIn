@@ -88,7 +88,7 @@ public class MessagesListFragment extends Fragment {
         binding.conversationsView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(getContext());
         binding.conversationsView.setLayoutManager(messageViewLayoutManager);
-        conversationAdapter = new ConversationAdapter(conversationViewModel.getConversations().getValue(), getContext(), userId, firestoreDatabase);
+        conversationAdapter = new ConversationAdapter(conversationViewModel.getConversations().getValue(), getContext(), userId, firestoreDatabase, this);
         binding.conversationsView.setAdapter(conversationAdapter);
 
         // Pull down the current user
