@@ -20,22 +20,24 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtMessageLayoutReceiver"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                tools:text="To: " />
-
-            <TextView
                 android:id="@+id/txtMessageLayoutSender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                tools:text="From: " />
+                android:textStyle="italic"
+                tools:text="Randy" />
+
+            <TextView
+                android:id="@+id/txtPayload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                tools:text="Some rad message!" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

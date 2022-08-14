@@ -22,27 +22,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,7 +42,7 @@ import edu.neu.tiedin.data.Message;
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.FragmentMessagesListBinding;
 
-public class MessagesFragment extends Fragment {
+public class MessagesListFragment extends Fragment {
 
     public String SHARED_PREFS;
     public String USER_KEY;
@@ -63,7 +52,7 @@ public class MessagesFragment extends Fragment {
     private static final String CHANNEL_DESCRIPTION = "Messages-Description";
 
     private static final String TAG = "MessagesFragment";
-    private ConversationViewModel conversationViewModel;
+    private MessagesListViewModel conversationViewModel;
 
     private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
@@ -71,7 +60,7 @@ public class MessagesFragment extends Fragment {
     private FragmentMessagesListBinding binding;
 
     private RecyclerView.LayoutManager messageViewLayoutManager;
-    private MessageAdapter messageAdapter;
+    private ConversationAdapter conversationAdapter;
 
     private NotificationManagerCompat notificationManager;
 
@@ -90,14 +79,14 @@ public class MessagesFragment extends Fragment {
         binding = FragmentMessagesListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        conversationViewModel = new ViewModelProvider(this).get(ConversationViewModel.class);
+        conversationViewModel = new ViewModelProvider(this).get(MessagesListViewModel.class);
 
         // Configure recyclerview
         binding.conversationsView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(getContext());
         binding.conversationsView.setLayoutManager(messageViewLayoutManager);
-        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), getContext(), conversationViewModel.getCurrentUser());
-        binding.conversationsView.setAdapter(messageAdapter);
+        conversationAdapter = new ConversationAdapter(conversationViewModel.getConversations().getValue(), getContext(), conversationViewModel.getCurrentUser());
+        binding.conversationsView.setAdapter(conversationAdapter);
 
         // Connect with firebase
         firestoreDatabase = FirebaseFirestore.getInstance();
@@ -116,8 +105,9 @@ public class MessagesFragment extends Fragment {
                 });
 
         // Configure notifications
-        notificationManager = NotificationManagerCompat.from(getContext());
-        createNotificationChannel();
+        // TODO
+//        notificationManager = NotificationManagerCompat.from(getContext());
+//        createNotificationChannel();
 
         // Get current messages
         final Query colRef = firestoreDatabase.collection("conversations")
@@ -126,16 +116,16 @@ public class MessagesFragment extends Fragment {
         colRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult().getDocuments() != null) {
-                        Log.i(TAG, "pulled down messages " + task.getResult().getDocuments().size());
-                        messageAdapter.addMessages(
+                        Log.i(TAG, "pulled down conversations" + task.getResult().getDocuments().size());
+                        conversationAdapter.addConversations(
                                 task.getResult().getDocuments()
                                         .stream()
                                         .map(
-                                                (Function<DocumentSnapshot, Message>) documentSnapshot ->
-                                                        documentSnapshot.toObject(Message.class))
+                                                (Function<DocumentSnapshot, Conversation>) documentSnapshot ->
+                                                        documentSnapshot.toObject(Conversation.class))
                                         .collect(Collectors.toList()));
                     } else {
-                        Log.e(TAG, "failed to pull down messages");
+                        Log.e(TAG, "failed to pull down conversations");
                     }
                 });
 
@@ -148,22 +138,17 @@ public class MessagesFragment extends Fragment {
 
             if (snapshot != null && !snapshot.getDocumentChanges().isEmpty()) {
                 for (DocumentChange change : snapshot.getDocumentChanges()) {
-                    Message changedMessage = change.getDocument().toObject(Message.class);
+                    Conversation changedConversation = change.getDocument().toObject(Conversation.class);
 
                     if (change.getType() == DocumentChange.Type.ADDED) {
                         Log.d(TAG, "Added data: " + change.getDocument().getData());
-                        messageAdapter.addMessage(changedMessage);
-
-                        // Create notification unless message was sent by this user
-                        if (!changedMessage.getSender().equals(userId)) {
-                            notifyMessage(changedMessage);
-                        }
+                        conversationAdapter.addConversation(changedConversation);
                     } else if (change.getType() == DocumentChange.Type.REMOVED) {
-                        Log.d(TAG, "Removed data: " + changedMessage.toString());
-                        messageAdapter.removeMessage(changedMessage);
+                        Log.d(TAG, "Removed data: " + changedConversation.toString());
+                        conversationAdapter.removeConversation(changedConversation);
                     } else if (change.getType() == DocumentChange.Type.MODIFIED) {
                         Log.d(TAG, "Modified data");
-                        messageAdapter.modifyMessage(changedMessage);
+                        conversationAdapter.modifyConversation(changedConversation);
                     } else {
                         Log.d(TAG, "Unknown data change: " + change.getDocument().getData());
                     }
@@ -173,34 +158,7 @@ public class MessagesFragment extends Fragment {
             }
         });
 
-        // Bind button handlers
-        binding.btnSendMessage.setOnClickListener(v -> sendMessageHandler());
-
         return root;
-    }
-
-    private void sendMessageHandler() {
-        // Error handling: current user id and conversation must be populated, textbox bust be full
-        String messagePayload = binding.txtMessage.getText().toString();
-        if (userId == null || conversationId == null) {
-            Toast.makeText(getContext(),"Unknown sender or receiver",Toast.LENGTH_SHORT).show();
-            return;
-        } else if (messagePayload.isEmpty()) {
-            Toast.makeText(getContext(),"Message cannot be blank",Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Create message object and push to DB
-        Message newMessage = new Message(userId, conversationId, messagePayload, System.currentTimeMillis());
-        firestoreDatabase.collection("messages").document(newMessage.get_id()).set(newMessage)
-                .addOnCompleteListener((OnCompleteListener<Void>) completedPostMessage -> {
-                    if(completedPostMessage.isSuccessful()){
-                        Toast.makeText(getContext(),"Posted new message",Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.e(TAG, "sendMessageHandler: failed to post message to DB");
-                        Toast.makeText(getContext(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 
     public void notifyMessage(Message changedMessage) {

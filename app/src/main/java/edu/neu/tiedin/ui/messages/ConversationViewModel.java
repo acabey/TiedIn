@@ -11,8 +11,8 @@ import edu.neu.tiedin.data.Message;
 import edu.neu.tiedin.data.User;
 
 public class ConversationViewModel extends ViewModel {
-    private MutableLiveData<User> currentUser;
-    private MutableLiveData<Conversation> currentConversation;
+    private MutableLiveData<User> currentUser = new MutableLiveData<>();
+    private MutableLiveData<Conversation> currentConversation = new MutableLiveData<>();
     private MutableLiveData<List<Message>> existingMessages = new MutableLiveData(new ArrayList<Message>());
     private MutableLiveData<List<Message>> filteredMessages = new MutableLiveData(new ArrayList<>());
     private MutableLiveData<List<Integer>> notificationIds = new MutableLiveData(new ArrayList<>());

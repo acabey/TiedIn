@@ -28,18 +28,18 @@ class MessageAdapter extends RecyclerView.Adapter {
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         public CardView cardView;
-        public TextView txtSender, txtReceiver;
+        public TextView txtSender, txtPayload;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
             this.cardView = (CardView) itemView.findViewById(R.id.messageCard);
             this.txtSender = (TextView) itemView.findViewById(R.id.txtMessageLayoutSender);
-            this.txtReceiver = (TextView) itemView.findViewById(R.id.txtMessageLayoutReceiver);
+            this.txtPayload = (TextView) itemView.findViewById(R.id.txtPayload);
         }
 
         public void bindThisData(Message messageToBind) {
-            txtSender.setText("From: " + messageToBind.getSender());
-            txtReceiver.setText("To: " + messageToBind.getRecipient());
+            txtSender.setText(messageToBind.getSender());
+            txtPayload.setText(messageToBind.getPayload());
 
             // Right align message if sent by the current user
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
