@@ -7,7 +7,7 @@
     <group>
         <item
             android:id="@+id/nav_home"
-            android:icon="@android:drawable/ic_menu_agenda"
+            android:icon="@drawable/ic_calendar"
             android:title="My Trips" />
         <item
             android:id="@+id/nav_find_trip"
@@ -15,15 +15,15 @@
             android:title="Find Trip" />
         <item
             android:id="@+id/nav_plan_trip"
-            android:icon="@android:drawable/ic_menu_agenda"
+            android:icon="@drawable/ic_book_plus"
             android:title="Plan Trip" />
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@android:drawable/ic_menu_myplaces"
-            android:title="Profile" />
+            android:id="@+id/nav_messages"
+            android:icon="@android:drawable/stat_notify_chat"
+            android:title="Messages" />
         <item
             android:id="@+id/nav_settings"
-            android:icon="@android:drawable/ic_menu_preferences"
+            android:icon="@drawable/ic_account_cog"
             android:title="Settings" />
     </group>
 </menu>
