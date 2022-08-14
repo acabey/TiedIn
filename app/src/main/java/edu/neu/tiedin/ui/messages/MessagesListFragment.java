@@ -111,12 +111,12 @@ public class MessagesListFragment extends Fragment {
 
         // Get current messages
         final Query colRef = firestoreDatabase.collection("conversations")
-                .whereArrayContains("participants", userId);
+                .whereArrayContains("participantIds", userId);
 
         colRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult().getDocuments() != null) {
-                        Log.i(TAG, "pulled down conversations" + task.getResult().getDocuments().size());
+                        Log.i(TAG, "pulled down conversations: " + task.getResult().getDocuments().size());
                         conversationAdapter.addConversations(
                                 task.getResult().getDocuments()
                                         .stream()

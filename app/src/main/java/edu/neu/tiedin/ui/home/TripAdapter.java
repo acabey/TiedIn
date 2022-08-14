@@ -188,6 +188,9 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.trip_item_manage_menu, popup.getMenu());
 
+                // Do not show contact if trip is owned by current user
+                popup.getMenu().findItem(R.id.tripItemContact).setVisible(!currentUserId.equals(trip.getOrganizerUserId()));
+
                 // Show delete option on popup menu if trip is owned by current user
                 popup.getMenu().findItem(R.id.tripItemDelete).setVisible(currentUserId.equals(trip.getOrganizerUserId()));
 
