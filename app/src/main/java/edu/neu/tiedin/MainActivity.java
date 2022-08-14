@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final SharedPreferences.OnSharedPreferenceChangeListener userChangeListener = (sharedPreferences, key) -> {
         Log.i(TAG, "MainActivity: sharedPreferenceChangeListener triggered with key: " + key);
-        if (key.equals(USER_KEY)) {
+        if (key != null && key.equals(USER_KEY)) {
             Log.d(TAG, "MainActivity: user change detected");
         }
     };
@@ -73,29 +73,32 @@ public class MainActivity extends AppCompatActivity {
         // Get login preferences (if they exist)
         sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
+        forceLogin();
 
         // Listen for changes in logged in user
         sharedpreferences.registerOnSharedPreferenceChangeListener(userChangeListener);
 
-        // Set header with User information
-        // Connect with firebase
-        firestoreDatabase = FirebaseFirestore.getInstance();
-        firestoreDatabase.collection("users")
-                .document(userId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        User currentUser = task.getResult().toObject(User.class);
-                        View header = binding.navView.getHeaderView(0);
-                        TextView headerName = (TextView) header.findViewById(R.id.header_name);
-                        TextView headerEmail = (TextView) header.findViewById(R.id.header_email);
+        if (userId != null) {
+            // Set header with User information
+            // Connect with firebase
+            firestoreDatabase = FirebaseFirestore.getInstance();
+            firestoreDatabase.collection("users")
+                    .document(userId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            User currentUser = task.getResult().toObject(User.class);
+                            View header = binding.navView.getHeaderView(0);
+                            TextView headerName = (TextView) header.findViewById(R.id.header_name);
+                            TextView headerEmail = (TextView) header.findViewById(R.id.header_email);
 
-                        headerName.setText(currentUser.getName());
-                        headerEmail.setText(currentUser.getEmail());
-                    } else {
-                        Log.e(TAG, "onCreate: failed to get user from DB");
-                    }
-        });
+                            headerName.setText(currentUser.getName());
+                            headerEmail.setText(currentUser.getEmail());
+                        } else {
+                            Log.e(TAG, "onCreate: failed to get user from DB");
+                        }
+                    });
+        }
     }
 
     @Override
