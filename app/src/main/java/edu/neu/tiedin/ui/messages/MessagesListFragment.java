@@ -79,17 +79,17 @@ public class MessagesListFragment extends Fragment {
         binding = FragmentMessagesListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Connect with firebase
+        firestoreDatabase = FirebaseFirestore.getInstance();
+
         conversationViewModel = new ViewModelProvider(this).get(MessagesListViewModel.class);
 
         // Configure recyclerview
         binding.conversationsView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(getContext());
         binding.conversationsView.setLayoutManager(messageViewLayoutManager);
-        conversationAdapter = new ConversationAdapter(conversationViewModel.getConversations().getValue(), getContext(), conversationViewModel.getCurrentUser());
+        conversationAdapter = new ConversationAdapter(conversationViewModel.getConversations().getValue(), getContext(), userId, firestoreDatabase);
         binding.conversationsView.setAdapter(conversationAdapter);
-
-        // Connect with firebase
-        firestoreDatabase = FirebaseFirestore.getInstance();
 
         // Pull down the current user
         firestoreDatabase.collection("users").document(userId).get()

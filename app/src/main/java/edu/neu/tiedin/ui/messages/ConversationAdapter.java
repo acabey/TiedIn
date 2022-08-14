@@ -1,6 +1,7 @@
 package edu.neu.tiedin.ui.messages;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,9 +24,11 @@ import edu.neu.tiedin.data.User;
 
 
 class ConversationAdapter extends RecyclerView.Adapter {
+    private static final String TAG = "ConversationAdapter";
     private final List<Conversation> conversations;
     private final Context context;
-    private final MutableLiveData<User> getCurrentUser;
+    private final String currentUserId;
+    private FirebaseFirestore firebaseFirestore;
 
     public class ConversationViewHolder extends RecyclerView.ViewHolder {
 
@@ -34,14 +40,49 @@ class ConversationAdapter extends RecyclerView.Adapter {
         }
 
         public void bindThisData(Conversation conversationToBind) {
-            txtParticipants.setText(conversationToBind.getParticipantIds().stream().collect(Collectors.joining(", ")));
+            // Initially set with UserIds, filtering out the current user
+            List<String> filteredUserIds = conversationToBind
+                    .getParticipantIds()
+                    .stream()
+                    .filter(s -> !s.equals(currentUserId))
+                    .collect(Collectors.toList());
+
+            // Comma separate
+            txtParticipants.setText(filteredUserIds
+                    .stream()
+                    .collect(Collectors.joining(", ")));
+
+            // Async pull actual usernames
+            firebaseFirestore.collection("users")
+                    .whereIn("_id", filteredUserIds)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null && task.getResult().getDocuments() != null && task.getResult().getDocuments().size() > 0) {
+                            ArrayList<String> filteredNames = new ArrayList<>();
+                            task.getResult().getDocuments().forEach(doc -> {
+                                User retrievedUser = doc.toObject(User.class);
+                                if (retrievedUser != null) {
+                                    filteredNames.add(retrievedUser.getName());
+                                } else {
+                                    Log.e(TAG, "bindThisData: null user retrieved");
+                                }
+                            });
+
+                            txtParticipants.setText(filteredNames
+                                    .stream()
+                                    .collect(Collectors.joining(", ")));
+                        } else {
+                            Log.e(TAG, "bindThisData: failed to replace participant IDs with names");
+                        }
+                    });
         }
     }
 
-    public ConversationAdapter(List<Conversation> conversations, Context context, MutableLiveData<User> getCurrentUser) {
+    public ConversationAdapter(List<Conversation> conversations, Context context, String currentUserId, FirebaseFirestore firebaseFirestore) {
         this.conversations = conversations;
         this.context = context;
-        this.getCurrentUser = getCurrentUser;
+        this.currentUserId = currentUserId;
+        this.firebaseFirestore = firebaseFirestore;
     }
 
     @NonNull
