@@ -17,7 +17,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/title_activity_main"
+            android:label="TiedIn!"
             android:theme="@style/Theme.TiedIn.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

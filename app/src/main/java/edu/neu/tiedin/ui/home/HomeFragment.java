@@ -1,7 +1,6 @@
 package edu.neu.tiedin.ui.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -9,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,8 +26,6 @@ import com.google.firebase.firestore.Query;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import edu.neu.tiedin.LoginActivity;
-import edu.neu.tiedin.MainActivity;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
 import edu.neu.tiedin.databinding.FragmentHomeBinding;

@@ -1,5 +1,9 @@
 package edu.neu.tiedin.ui.messages;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,10 +15,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,27 +23,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,29 +41,38 @@ import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.Conversation;
 import edu.neu.tiedin.data.Message;
 import edu.neu.tiedin.data.User;
-import edu.neu.tiedin.databinding.FragmentMessagesListBinding;
+import edu.neu.tiedin.databinding.FragmentConversationBinding;
 
-public class MessagesFragment extends Fragment {
+public class ConversationFragment extends Fragment {
 
     public String SHARED_PREFS;
     public String USER_KEY;
 
-    private static final String CHANNEL_ID = "Messages-ID";
-    private static final String CHANNEL_NAME = "Messages-Name";
-    private static final String CHANNEL_DESCRIPTION = "Messages-Description";
+    private static final String CHANNEL_ID = "Conversations-ID";
+    private static final String CHANNEL_NAME = "Conversations-Name";
+    private static final String CHANNEL_DESCRIPTION = "Conversations-Description";
 
-    private static final String TAG = "MessagesFragment";
+    private static final String TAG = "ConversationFragment";
     private ConversationViewModel conversationViewModel;
 
     private FirebaseFirestore firestoreDatabase;
     private SharedPreferences sharedpreferences;
     private String userId;
-    private FragmentMessagesListBinding binding;
+    private String conversationId;
+    private FragmentConversationBinding binding;
 
     private RecyclerView.LayoutManager messageViewLayoutManager;
     private MessageAdapter messageAdapter;
 
     private NotificationManagerCompat notificationManager;
+
+    public static ConversationFragment newInstance(String conversationId) {
+        ConversationFragment f = new ConversationFragment();
+        Bundle args = new Bundle();
+        args.putString("conversationId", conversationId);
+        f.setArguments(args);
+        return f;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,25 +81,41 @@ public class MessagesFragment extends Fragment {
         USER_KEY = getString(R.string.sessionUserIdKey);
         sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
+
+        Bundle args = getArguments();
+        this.conversationId = args.getString("conversationId", null);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        binding = FragmentMessagesListBinding.inflate(inflater, container, false);
+        binding = FragmentConversationBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         conversationViewModel = new ViewModelProvider(this).get(ConversationViewModel.class);
 
         // Configure recyclerview
-        binding.conversationsView.setHasFixedSize(true);
+        binding.messagesView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(getContext());
-        binding.conversationsView.setLayoutManager(messageViewLayoutManager);
+        binding.messagesView.setLayoutManager(messageViewLayoutManager);
         messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), getContext(), conversationViewModel.getCurrentUser());
-        binding.conversationsView.setAdapter(messageAdapter);
+        binding.messagesView.setAdapter(messageAdapter);
 
         // Connect with firebase
         firestoreDatabase = FirebaseFirestore.getInstance();
+
+        // Pull down current conversation
+        firestoreDatabase.collection("conversations").document(conversationId).get()
+                .onSuccessTask(snapshot -> Tasks.forResult(validateTUserResultExists(snapshot, conversationId, Conversation.class)))
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "onCreateView: pulled down conversation");
+                        conversationViewModel.getCurrentConversation().setValue(task.getResult().toObject(Conversation.class));
+                    } else {
+                        Log.e(TAG, "onCreateView: failed to pull down conversation");
+                        Toast.makeText(getContext(), "Failed to pull down conversation", Toast.LENGTH_SHORT);
+                    }
+                });
 
         // Pull down the current user
         firestoreDatabase.collection("users").document(userId).get()
@@ -120,24 +135,22 @@ public class MessagesFragment extends Fragment {
         createNotificationChannel();
 
         // Get current messages
-        final Query colRef = firestoreDatabase.collection("conversations")
-                .whereArrayContains("participants", userId);
-
-        colRef.get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult().getDocuments() != null) {
-                        Log.i(TAG, "pulled down messages " + task.getResult().getDocuments().size());
-                        messageAdapter.addMessages(
-                                task.getResult().getDocuments()
-                                        .stream()
-                                        .map(
-                                                (Function<DocumentSnapshot, Message>) documentSnapshot ->
-                                                        documentSnapshot.toObject(Message.class))
-                                        .collect(Collectors.toList()));
-                    } else {
-                        Log.e(TAG, "failed to pull down messages");
-                    }
-                });
+        final Query colRef = firestoreDatabase.collection("messages")
+                .whereEqualTo("conversation_id", conversationId);
+        colRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().getDocuments() != null) {
+                Log.i(TAG, "pulled down messages " + task.getResult().getDocuments().size());
+                messageAdapter.addMessages(
+                        task.getResult().getDocuments()
+                                .stream()
+                                .map(
+                                        (Function<DocumentSnapshot, Message>) documentSnapshot ->
+                                                documentSnapshot.toObject(Message.class))
+                                .collect(Collectors.toList()));
+            } else {
+                Log.e(TAG, "failed to pull down messages");
+            }
+        });
 
         // Listen for ongoing changes in trips
         ListenerRegistration listenerRegistration = colRef.addSnapshotListener((snapshot, e) -> {
@@ -194,13 +207,13 @@ public class MessagesFragment extends Fragment {
         Message newMessage = new Message(userId, conversationId, messagePayload, System.currentTimeMillis());
         firestoreDatabase.collection("messages").document(newMessage.get_id()).set(newMessage)
                 .addOnCompleteListener((OnCompleteListener<Void>) completedPostMessage -> {
-                    if(completedPostMessage.isSuccessful()){
-                        Toast.makeText(getContext(),"Posted new message",Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.e(TAG, "sendMessageHandler: failed to post message to DB");
-                        Toast.makeText(getContext(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
-                    }
-                });
+            if(completedPostMessage.isSuccessful()){
+                Toast.makeText(getContext(),"Posted new message",Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e(TAG, "sendMessageHandler: failed to post message to DB");
+                Toast.makeText(getContext(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void notifyMessage(Message changedMessage) {
