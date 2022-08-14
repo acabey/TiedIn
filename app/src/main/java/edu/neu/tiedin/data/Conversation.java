@@ -6,15 +6,15 @@ import java.util.UUID;
 
 public class Conversation {
     private String _id;
-    private List<User> participants;
+    private List<String> participantIds;
 
     public Conversation() {
         this._id = UUID.randomUUID().toString();
     }
 
-    public Conversation(List<User> participants) {
+    public Conversation(List<String> participantIds) {
         this();
-        this.participants = participants;
+        this.participantIds = participantIds;
     }
 
     public String get_id() {
@@ -25,12 +25,12 @@ public class Conversation {
         this._id = _id;
     }
 
-    public List<User> getParticipants() {
-        return participants;
+    public List<String> getParticipantIds() {
+        return participantIds;
     }
 
-    public void setParticipants(List<User> participants) {
-        this.participants = participants;
+    public void setParticipantIds(List<String> participantIds) {
+        this.participantIds = participantIds;
     }
 
     @Override

@@ -34,6 +34,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -117,7 +118,7 @@ public class FindTripFragment extends Fragment {
         View root = binding.getRoot();
 
         // Configure trip pull from DB
-        tripAdapter = new TripAdapter(findTripViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId, findTripViewModel.getLocation());
+        tripAdapter = new TripAdapter(findTripViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId, findTripViewModel.getLocation(), this);
 
         // Configure Climb recyclerview
         tripViewLayoutManager = new LinearLayoutManager(getContext());
@@ -125,7 +126,7 @@ public class FindTripFragment extends Fragment {
         binding.recyclerViewListTrips.setLayoutManager(tripViewLayoutManager);
 
         // Get current trips
-        final CollectionReference colRef = firestoreDatabase.collection("trips");
+        final Query colRef = firestoreDatabase.collection("trips").whereNotEqualTo("organizerUserId", userId);
         colRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().getDocuments() != null) {
                 Log.i(TAG, "FindTripFragment: pulled down trips " + task.getResult().getDocuments().size());

@@ -69,7 +69,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         // Configure trip pull from DB
-        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId, new MutableLiveData<Location>());
+        tripAdapter = new TripAdapter(homeViewModel.getTrips().getValue(), getContext(), firestoreDatabase, userId, new MutableLiveData<Location>(), this);
 
         // Configure Climb recyclerview
         tripViewLayoutManager = new LinearLayoutManager(getContext());

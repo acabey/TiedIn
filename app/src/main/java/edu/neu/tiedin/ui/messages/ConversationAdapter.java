@@ -4,11 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,7 +34,7 @@ class ConversationAdapter extends RecyclerView.Adapter {
         }
 
         public void bindThisData(Conversation conversationToBind) {
-            txtParticipants.setText(conversationToBind.getParticipants().stream().map(user -> user.getName()).collect(Collectors.joining(", ")));
+            txtParticipants.setText(conversationToBind.getParticipantIds().stream().collect(Collectors.joining(", ")));
         }
     }
 

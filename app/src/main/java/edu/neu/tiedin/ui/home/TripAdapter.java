@@ -1,9 +1,7 @@
 package edu.neu.tiedin.ui.home;
 
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,23 +11,17 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
-import com.google.common.base.Converter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -38,13 +30,14 @@ import org.apache.commons.text.WordUtils;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.ClimbingTrip;
+import edu.neu.tiedin.data.Conversation;
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.types.openbeta.composedschema.ComposedArea;
 
@@ -57,12 +50,15 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
     private String currentUserId;
     private MutableLiveData<Location> locationData;
 
-    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore, String currentUserId, MutableLiveData<Location> locationData) {
+    private Fragment parentFragment;
+
+    public TripAdapter(ArrayList<ClimbingTrip> trips, Context context, FirebaseFirestore firebaseFirestore, String currentUserId, MutableLiveData<Location> locationData, Fragment parentFragment) {
         this.trips = trips;
         this.context = context;
         this.firebaseFirestore = firebaseFirestore;
         this.currentUserId = currentUserId;
         this.locationData = locationData;
+        this.parentFragment = parentFragment;
     }
 
     public void filterList(ArrayList<ClimbingTrip> filterList) {
@@ -186,16 +182,20 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
             // Clicking on the card toggles "expanded view" to include the full areas list, description, etc.
             tripCard.setOnClickListener(v -> toggleExpanded());
 
-            // Show popup menu if trip is owned by current user
-            btnPopupMenu.setVisibility(currentUserId.equals(trip.getOrganizerUserId()) ? View.VISIBLE : View.GONE);
-
             // Popup menu allows for deletion
             btnPopupMenu.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(context, v);
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.trip_item_manage_menu, popup.getMenu());
+
+                // Show delete option on popup menu if trip is owned by current user
+                popup.getMenu().findItem(R.id.tripItemDelete).setVisible(currentUserId.equals(trip.getOrganizerUserId()));
+
                 popup.setOnMenuItemClickListener(item -> {
                     switch (item.getItemId()) {
+                        case (R.id.tripItemContact):
+                            contactOrganizer(trip);
+                            return true;
                         case (R.id.tripItemDelete):
                             deleteTrip(trip);
                             return true;
@@ -263,6 +263,22 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
             } else {
                 Log.d(TAG, "deleteTrip: tried to delete trip UUID " + trip.get_id() + ", but could not find in DB");
             }
+        }
+
+        void contactOrganizer(ClimbingTrip trip) {
+            // Create new conversation
+            Conversation newConvo = new Conversation(Arrays.asList(currentUserId, trip.getOrganizerUserId()));
+
+            // Post it to the DB
+            firebaseFirestore.collection("conversations").document(newConvo.get_id()).set(newConvo).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Log.i(TAG, "contactOrganizer: created conversation, navigating to messages");
+                    NavHostFragment.findNavController(parentFragment).navigate(R.id.nav_messages);
+                } else {
+                    Log.e(TAG, "contactOrganizer: failed to post message");
+                    Toast.makeText(context, "Failed to create conversation with " + trip.getOrganizerUserId(), Toast.LENGTH_SHORT);
+                }
+            });
         }
     }
 }
