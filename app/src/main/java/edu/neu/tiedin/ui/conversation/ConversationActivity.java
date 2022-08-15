@@ -1,17 +1,10 @@
 package edu.neu.tiedin.ui.conversation;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -19,10 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -33,7 +23,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,7 +31,6 @@ import edu.neu.tiedin.data.Conversation;
 import edu.neu.tiedin.data.Message;
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.ActivityConversationBinding;
-import edu.neu.tiedin.databinding.ActivityMainBinding;
 
 public class ConversationActivity extends AppCompatActivity {
 
@@ -65,7 +53,6 @@ public class ConversationActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager messageViewLayoutManager;
     private MessageAdapter messageAdapter;
 
-    private NotificationManagerCompat notificationManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,10 +109,6 @@ public class ConversationActivity extends AppCompatActivity {
                     }
                 });
 
-        // Configure notifications
-        notificationManager = NotificationManagerCompat.from(this);
-        createNotificationChannel();
-
         // Get current messages
         final Query colRef = firestoreDatabase.collection("messages")
                 .whereEqualTo("conversationId", conversationId);
@@ -158,11 +141,6 @@ public class ConversationActivity extends AppCompatActivity {
                     if (change.getType() == DocumentChange.Type.ADDED) {
                         Log.d(TAG, "Added data: " + change.getDocument().getData());
                         messageAdapter.addMessage(changedMessage);
-
-                        // Create notification unless message was sent by this user
-                        if (!changedMessage.getSender().equals(userId)) {
-                            notifyMessage(changedMessage);
-                        }
                     } else if (change.getType() == DocumentChange.Type.REMOVED) {
                         Log.d(TAG, "Removed data: " + changedMessage.toString());
                         messageAdapter.removeMessage(changedMessage);
@@ -192,7 +170,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void sendMessageHandler() {
-        // Error handling: current user id and conversation must be populated, textbox bust be full
+        // Error handling: current user id and conversation must be populated, textbox must be full
         String messagePayload = binding.txtMessage.getText().toString();
         if (userId == null || conversationId == null) {
             Toast.makeText(this,"Unknown sender or receiver",Toast.LENGTH_SHORT).show();
@@ -207,45 +185,12 @@ public class ConversationActivity extends AppCompatActivity {
         firestoreDatabase.collection("messages").document(newMessage.get_id()).set(newMessage)
                 .addOnCompleteListener((OnCompleteListener<Void>) completedPostMessage -> {
             if(completedPostMessage.isSuccessful()){
-                Toast.makeText(this,"Posted new message",Toast.LENGTH_SHORT).show();
+                binding.txtMessage.setText("");
             } else {
                 Log.e(TAG, "sendMessageHandler: failed to post message to DB");
-                Toast.makeText(this,"Unable to post message to DB",Toast.LENGTH_SHORT).show();
+                binding.txtMessage.setError("Unable to post message to DB");
             }
         });
-    }
-
-    public void notifyMessage(Message changedMessage) {
-        // Create an explicit intent for an Activity in your app
-        Intent intent = new Intent(); // TODO
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("New message")
-                .setContentText(changedMessage.getPayload())
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-        int notificationId = ThreadLocalRandom.current().nextInt();
-        notificationManager.notify(notificationId, builder.build());
-//        notificationIds.add(notificationId);
-    }
-
-    /**
-     * https://developer.android.com/training/notify-user/build-notification
-     */
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
-            channel.setDescription(CHANNEL_DESCRIPTION);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 
     private DocumentSnapshot validateTUserResultExists(DocumentSnapshot snapshot, String attemptedKey, Class<?> t) throws Exception {
