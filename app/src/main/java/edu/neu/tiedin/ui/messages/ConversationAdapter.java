@@ -43,7 +43,7 @@ class ConversationAdapter extends RecyclerView.Adapter {
 
         public ConversationViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.cardView = (CardView) itemView;
+            this.cardView = (CardView) itemView.findViewById(R.id.conversationCard);
             this.txtParticipants = (TextView) itemView.findViewById(R.id.txtParticipants);
         }
 
