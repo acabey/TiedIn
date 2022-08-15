@@ -79,6 +79,7 @@ class ConversationAdapter extends RecyclerView.Adapter {
                             txtParticipants.setText(filteredNames
                                     .stream()
                                     .collect(Collectors.joining(", ")));
+                            Log.d(TAG, "bindThisData: replaced user ID with name");
                         } else {
                             Log.e(TAG, "bindThisData: failed to replace participant IDs with names");
                         }

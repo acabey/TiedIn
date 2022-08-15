@@ -2,6 +2,7 @@ package edu.neu.tiedin.ui.conversation;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +24,11 @@ import edu.neu.tiedin.data.User;
 class MessageAdapter extends RecyclerView.Adapter {
     private final List<Message> messages;
     private final Context context;
-    private final MutableLiveData<User> getCurrentUser;
+    private final String currentUserId;
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
+        private static final String TAG = "MessageAdapter";
         public CardView cardView;
         public TextView txtSender, txtPayload;
 
@@ -43,7 +45,7 @@ class MessageAdapter extends RecyclerView.Adapter {
 
             // Right align message if sent by the current user
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-            if (getCurrentUser.getValue() != null && messageToBind.getSender().equals(getCurrentUser.getValue().getEmail())) {
+            if (currentUserId != null && messageToBind.getSender().equals(currentUserId)) {
                 params.addRule(RelativeLayout.ALIGN_PARENT_END);
             } else {
                 params.addRule(RelativeLayout.ALIGN_PARENT_START);
@@ -52,10 +54,10 @@ class MessageAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public MessageAdapter(List<Message> messages, Context context, MutableLiveData<User> getCurrentUser) {
+    public MessageAdapter(List<Message> messages, Context context, String currentUserId) {
         this.messages = messages;
         this.context = context;
-        this.getCurrentUser = getCurrentUser;
+        this.currentUserId = currentUserId;
     }
 
     @NonNull

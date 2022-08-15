@@ -90,7 +90,7 @@ public class ConversationActivity extends AppCompatActivity {
         binding.messagesView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(this);
         binding.messagesView.setLayoutManager(messageViewLayoutManager);
-        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), this, conversationViewModel.getCurrentUser());
+        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), this, userId);
         binding.messagesView.setAdapter(messageAdapter);
 
         // Connect with firebase

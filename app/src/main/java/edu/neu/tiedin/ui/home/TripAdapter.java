@@ -242,9 +242,10 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder> {
                     String joinedAreas = viewTrip
                             .getAreas()
                             .stream()
-                            .map(composedArea -> addAreaDistance.apply(composedArea))
+                            .map(addAreaDistance::apply)
                             .collect(Collectors.joining(", "));
                     txtAreas.setText(joinedAreas);
+                    Log.d(TAG, "toggleExpanded: replaced text with distances");
                 } else {
                     Log.d(TAG, "toggleExpanded: location value is null");
                 }
