@@ -80,6 +80,9 @@ public class ConversationActivity extends AppCompatActivity {
             this.conversationId = b.getString("conversationId", null);
         }
 
+        // Connect with firebase
+        firestoreDatabase = FirebaseFirestore.getInstance();
+
         // View elements
         binding = ActivityConversationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -90,11 +93,8 @@ public class ConversationActivity extends AppCompatActivity {
         binding.messagesView.setHasFixedSize(true);
         messageViewLayoutManager = new LinearLayoutManager(this);
         binding.messagesView.setLayoutManager(messageViewLayoutManager);
-        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), this, userId);
+        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), this, userId, firestoreDatabase);
         binding.messagesView.setAdapter(messageAdapter);
-
-        // Connect with firebase
-        firestoreDatabase = FirebaseFirestore.getInstance();
 
         // Pull down current conversation
         firestoreDatabase.collection("conversations").document(conversationId).get()
