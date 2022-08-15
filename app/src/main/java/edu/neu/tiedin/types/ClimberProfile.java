@@ -24,6 +24,16 @@ public class ClimberProfile {
         this.equipment = equipment;
     }
 
+    public ClimberProfile(ClimberProfile other) {
+        this.icon = other.getIcon();
+        this.location = other.getLocation();
+        this.styles = other.getStyles();
+        this.skillLevel = other.getSkillLevel();
+        this.preferredAreas = other.getPreferredAreas();
+        this.preferredTimes = other.getPreferredTimes();
+        this.equipment = other.getEquipment();
+    }
+
     public String getIcon() {
         return icon;
     }

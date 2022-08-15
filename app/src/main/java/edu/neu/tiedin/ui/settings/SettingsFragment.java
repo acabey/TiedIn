@@ -14,24 +14,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.chip.Chip;
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import edu.neu.tiedin.LoginActivity;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.User;
 import edu.neu.tiedin.databinding.FragmentSettingsBinding;
+import edu.neu.tiedin.types.ClimberProfile;
 import edu.neu.tiedin.types.ClimbingEquipment;
 import edu.neu.tiedin.types.ClimbingSkill;
 import edu.neu.tiedin.types.ClimbingStyle;
@@ -158,6 +158,31 @@ public class SettingsFragment extends Fragment {
                         Toast.makeText(getContext(), "Failed to pull down user information", Toast.LENGTH_SHORT);
                     }
                 });
+
+        // Post user on save
+        binding.btnSettingsSave.setOnClickListener(v -> firestoreDatabase.collection("users").document(userId).get()
+                .onSuccessTask(snapshot -> Tasks.forResult(validateTUserResultExists(snapshot, userId, User.class)))
+                .onSuccessTask(snapshot -> Tasks.forResult(((Function<DocumentSnapshot, Task<Void>>) userResultSnap -> {
+                    Log.i(TAG, "onCreateView: got current user, building modified user");
+                    User currentUser = userResultSnap.toObject(User.class);
+                    User newUser = new User(currentUser);
+                    newUser.setName(settingsViewModel.getName().getValue());
+                    newUser.setPhoneNumber(settingsViewModel.getPhoneNumber().getValue());
+                    newUser.getProfile().setEquipment(settingsViewModel.getEquipment().getValue());
+                    newUser.getProfile().setSkillLevel(settingsViewModel.getSkillLevel().getValue());
+                    newUser.getProfile().setStyles(settingsViewModel.getStyles().getValue());
+
+                    return firestoreDatabase.collection("users").document(userId).set(newUser);
+                        }).apply(snapshot)
+                ))
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "onCreateView: posted changes to user");
+                    } else {
+                        Log.e(TAG, "onCreateView: failed to post changes to user: " + task.getException());
+                        Toast.makeText(getContext(), "Failed to post changes to user information", Toast.LENGTH_SHORT);
+                    }
+                }));
 
         // Delete all sharedPreferences and transition back to login
         binding.btnLogout.setOnClickListener(v -> {

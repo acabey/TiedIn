@@ -7,6 +7,7 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
+import edu.neu.tiedin.type.Climb;
 import edu.neu.tiedin.types.ClimberProfile;
 
 public class User {
@@ -29,6 +30,15 @@ public class User {
         this.password = generateEncodedPasswordHash(password);
         this.phoneNumber = phoneNumber;
         this.profile = profile;
+    }
+
+    public User(User other) {
+        this._id = other.get_id();
+        this.name = other.getName();
+        this.email = other.getEmail();
+        this.password = other.getPassword();
+        this.phoneNumber = other.getPhoneNumber();
+        this.profile = new ClimberProfile(other.getProfile());
     }
 
     public String get_id() {
