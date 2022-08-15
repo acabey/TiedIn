@@ -1,5 +1,6 @@
-package edu.neu.tiedin.ui.messages;
+package edu.neu.tiedin.ui.conversation;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,16 +14,12 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,9 +38,10 @@ import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.Conversation;
 import edu.neu.tiedin.data.Message;
 import edu.neu.tiedin.data.User;
-import edu.neu.tiedin.databinding.FragmentConversationBinding;
+import edu.neu.tiedin.databinding.ActivityConversationBinding;
+import edu.neu.tiedin.databinding.ActivityMainBinding;
 
-public class ConversationFragment extends Fragment {
+public class ConversationActivity extends AppCompatActivity {
 
     public String SHARED_PREFS;
     public String USER_KEY;
@@ -59,46 +57,37 @@ public class ConversationFragment extends Fragment {
     private SharedPreferences sharedpreferences;
     private String userId;
     private String conversationId;
-    private FragmentConversationBinding binding;
+    private ActivityConversationBinding binding;
 
     private RecyclerView.LayoutManager messageViewLayoutManager;
     private MessageAdapter messageAdapter;
 
     private NotificationManagerCompat notificationManager;
 
-    public static ConversationFragment newInstance(String conversationId) {
-        ConversationFragment f = new ConversationFragment();
-        Bundle args = new Bundle();
-        args.putString("conversationId", conversationId);
-        f.setArguments(args);
-        return f;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SHARED_PREFS = getString(R.string.sessionLoginPrefsKey);
         USER_KEY = getString(R.string.sessionUserIdKey);
-        sharedpreferences = getContext().getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        sharedpreferences = this.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         userId = sharedpreferences.getString(USER_KEY, null);
 
-        Bundle args = getArguments();
-        this.conversationId = args.getString("conversationId", null);
-    }
+        Bundle b = getIntent().getExtras();
+        if (b != null) {
+            this.conversationId = b.getString("conversationId", null);
+        }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        binding = FragmentConversationBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        // View elements
+        binding = ActivityConversationBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         conversationViewModel = new ViewModelProvider(this).get(ConversationViewModel.class);
 
         // Configure recyclerview
         binding.messagesView.setHasFixedSize(true);
-        messageViewLayoutManager = new LinearLayoutManager(getContext());
+        messageViewLayoutManager = new LinearLayoutManager(this);
         binding.messagesView.setLayoutManager(messageViewLayoutManager);
-        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), getContext(), conversationViewModel.getCurrentUser());
+        messageAdapter = new MessageAdapter(conversationViewModel.getFilteredMessages().getValue(), this, conversationViewModel.getCurrentUser());
         binding.messagesView.setAdapter(messageAdapter);
 
         // Connect with firebase
@@ -113,7 +102,7 @@ public class ConversationFragment extends Fragment {
                         conversationViewModel.getCurrentConversation().setValue(task.getResult().toObject(Conversation.class));
                     } else {
                         Log.e(TAG, "onCreateView: failed to pull down conversation");
-                        Toast.makeText(getContext(), "Failed to pull down conversation", Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Failed to pull down conversation", Toast.LENGTH_SHORT);
                     }
                 });
 
@@ -126,12 +115,12 @@ public class ConversationFragment extends Fragment {
                         conversationViewModel.getCurrentUser().setValue(task.getResult().toObject(User.class));
                     } else {
                         Log.e(TAG, "onCreateView: failed to pull down user");
-                        Toast.makeText(getContext(), "Failed to pull down user information", Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Failed to pull down user information", Toast.LENGTH_SHORT);
                     }
                 });
 
         // Configure notifications
-        notificationManager = NotificationManagerCompat.from(getContext());
+        notificationManager = NotificationManagerCompat.from(this);
         createNotificationChannel();
 
         // Get current messages
@@ -188,18 +177,16 @@ public class ConversationFragment extends Fragment {
 
         // Bind button handlers
         binding.btnSendMessage.setOnClickListener(v -> sendMessageHandler());
-
-        return root;
     }
 
     private void sendMessageHandler() {
         // Error handling: current user id and conversation must be populated, textbox bust be full
         String messagePayload = binding.txtMessage.getText().toString();
         if (userId == null || conversationId == null) {
-            Toast.makeText(getContext(),"Unknown sender or receiver",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Unknown sender or receiver",Toast.LENGTH_SHORT).show();
             return;
         } else if (messagePayload.isEmpty()) {
-            Toast.makeText(getContext(),"Message cannot be blank",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Message cannot be blank",Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -208,10 +195,10 @@ public class ConversationFragment extends Fragment {
         firestoreDatabase.collection("messages").document(newMessage.get_id()).set(newMessage)
                 .addOnCompleteListener((OnCompleteListener<Void>) completedPostMessage -> {
             if(completedPostMessage.isSuccessful()){
-                Toast.makeText(getContext(),"Posted new message",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Posted new message",Toast.LENGTH_SHORT).show();
             } else {
                 Log.e(TAG, "sendMessageHandler: failed to post message to DB");
-                Toast.makeText(getContext(),"Unable to post message to DB",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Unable to post message to DB",Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -220,9 +207,9 @@ public class ConversationFragment extends Fragment {
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(); // TODO
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("New message")
                 .setContentText(changedMessage.getPayload())
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -252,11 +239,11 @@ public class ConversationFragment extends Fragment {
     private DocumentSnapshot validateTUserResultExists(DocumentSnapshot snapshot, String attemptedKey, Class<?> t) throws Exception {
         if (snapshot == null) {
             Log.e(TAG, "bind: " + "null result from DB (key: " + attemptedKey + ")");
-            Toast.makeText(getContext(), "Null result from database", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Null result from database", Toast.LENGTH_SHORT).show();
             throw new Exception("null result from DB (key: " + attemptedKey + ")");
         } else if (snapshot.toObject(t) == null) {
             Log.e(TAG, "bind: " + "null user from DB (key: " + attemptedKey + ")");
-            Toast.makeText(getContext(), "Null object result from database", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Null object result from database", Toast.LENGTH_SHORT).show();
             throw new Exception("null object from DB (key: " + attemptedKey + ")");
         }
         return snapshot;

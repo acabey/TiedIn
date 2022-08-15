@@ -1,6 +1,8 @@
 package edu.neu.tiedin.ui.messages;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import edu.neu.tiedin.R;
 import edu.neu.tiedin.data.Conversation;
 import edu.neu.tiedin.data.User;
+import edu.neu.tiedin.ui.conversation.ConversationActivity;
 
 
 class ConversationAdapter extends RecyclerView.Adapter {
@@ -84,11 +86,11 @@ class ConversationAdapter extends RecyclerView.Adapter {
 
             // Bind CardView to open Conversation Fragment
             cardView.setOnClickListener(v -> {
-                FragmentTransaction ft = parentFragment.getParentFragmentManager().beginTransaction();
-
-                ft.replace(R.id.nav_messages, ConversationFragment.newInstance(conversationToBind.get_id()), null);
-                ft.addToBackStack(ConversationFragment.class.getName());
-                ft.commit();
+                Intent intent = new Intent(parentFragment.getActivity(), ConversationActivity.class);
+                Bundle b = new Bundle();
+                b.putString("conversationId", conversationToBind.get_id());
+                intent.putExtras(b);
+                parentFragment.startActivity(intent);
             });
 
         }

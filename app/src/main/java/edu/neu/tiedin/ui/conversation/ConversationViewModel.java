@@ -1,4 +1,4 @@
-package edu.neu.tiedin.ui.messages;
+package edu.neu.tiedin.ui.conversation;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
