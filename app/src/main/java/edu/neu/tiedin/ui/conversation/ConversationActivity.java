@@ -19,7 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -173,6 +176,15 @@ public class ConversationActivity extends AppCompatActivity {
             } else {
                 Log.d(TAG, "Current data: null");
             }
+        });
+
+        // Bind editText send action
+        binding.txtMessage.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                binding.btnSendMessage.performClick();
+                return true;
+            }
+            return false;
         });
 
         // Bind button handlers
