@@ -128,7 +128,7 @@ public class ConversationActivity extends AppCompatActivity {
 
         // Get current messages
         final Query colRef = firestoreDatabase.collection("messages")
-                .whereEqualTo("conversation_id", conversationId);
+                .whereEqualTo("conversationId", conversationId);
         colRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().getDocuments() != null) {
                 Log.i(TAG, "pulled down messages " + task.getResult().getDocuments().size());
